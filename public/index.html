@@ -18,7 +18,6 @@
             --text: #e0e0e0;
             --text2: #a0a8c0;
             --radius: 16px;
-            --shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,238 +26,126 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: linear-gradient(135deg, #0a0f1e 0%, #1a1f2e 30%, #0d1117 60%, #0a0f1e 100%);
             background-attachment: fixed;
-            min-height: 100vh;
-            min-height: 100dvh;
+            min-height: 100vh; min-height: 100dvh;
             color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            display: flex; justify-content: center; align-items: flex-start;
             padding: 10px;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
+            user-select: none; -webkit-user-select: none;
         }
 
         .container {
-            max-width: 520px;
-            width: 100%;
+            max-width: 520px; width: 100%;
             background: var(--surface);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: 24px;
-            padding: 20px 16px;
-            box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.05);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border-radius: 24px; padding: 20px 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.08);
             margin: 10px 0;
         }
 
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 16px;
-        }
+        .header { text-align: center; margin-bottom: 16px; }
+        .header h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #f9d423 0%, #f83600 50%, #f9d423 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px; margin-bottom: 4px; }
+        .header .version { font-size: 0.7rem; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; }
 
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #f9d423 0%, #f83600 50%, #f9d423 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .header .version {
-            font-size: 0.7rem;
-            color: var(--text2);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        /* Screen System */
         .screen { display: none; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .input-group { margin: 8px 0; }
+
+        input, button {
+            width: 100%; padding: 14px 16px; margin: 6px 0;
+            border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(15, 20, 35, 0.9); color: white; font-size: 1rem;
+            transition: all 0.2s; outline: none;
         }
 
-        /* Input & Buttons */
-        .input-group {
-            margin: 8px 0;
-        }
-
-        input, button, select {
-            width: 100%;
-            padding: 14px 16px;
-            margin: 6px 0;
-            border-radius: var(--radius);
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(15, 20, 35, 0.9);
-            color: white;
-            font-size: 1rem;
-            transition: all 0.2s;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 20px rgba(249, 212, 35, 0.15);
-        }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 20px rgba(249, 212, 35, 0.15); }
 
         button {
             background: linear-gradient(135deg, #f83600 0%, #f9d423 100%);
-            color: #0a0f1e;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            letter-spacing: 0.5px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            color: #0a0f1e; font-weight: 700; cursor: pointer; border: none;
+            letter-spacing: 0.5px; transition: all 0.3s; position: relative; overflow: hidden;
         }
 
-        button:active {
-            transform: scale(0.96);
-            filter: brightness(1.1);
-        }
-
-        button:disabled {
-            opacity: 0.4;
-            transform: none;
-            filter: none;
-            pointer-events: none;
-        }
+        button:active { transform: scale(0.96); filter: brightness(1.1); }
+        button:disabled { opacity: 0.4; transform: none; filter: none; pointer-events: none; }
 
         button.secondary {
-            background: rgba(255,255,255,0.08);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-weight: 600;
+            background: rgba(255,255,255,0.08); color: white;
+            border: 1px solid rgba(255,255,255,0.2); font-weight: 600;
         }
 
         button.danger {
-            background: rgba(255, 60, 60, 0.25);
-            color: #ff6b6b;
+            background: rgba(255, 60, 60, 0.25); color: #ff6b6b;
             border: 1px solid rgba(255, 60, 60, 0.4);
         }
 
         button.training-btn {
-            background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%);
-            color: white;
+            background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%); color: white;
         }
 
-        /* Cards */
         .card {
-            background: var(--surface2);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin: 10px 0;
-            border: 1px solid rgba(255,255,255,0.06);
+            background: var(--surface2); border-radius: var(--radius);
+            padding: 16px; margin: 10px 0; border: 1px solid rgba(255,255,255,0.06);
         }
 
         .card-header {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: 700; font-size: 1.1rem; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
         }
 
-        /* Room Code */
         .code-display {
-            font-size: 2.8rem;
-            text-align: center;
-            font-weight: 900;
-            color: var(--gold);
-            letter-spacing: 6px;
-            background: rgba(0,0,0,0.5);
-            padding: 18px;
-            border-radius: 20px;
-            margin: 12px 0;
+            font-size: 2.8rem; text-align: center; font-weight: 900;
+            color: var(--gold); letter-spacing: 6px;
+            background: rgba(0,0,0,0.5); padding: 18px;
+            border-radius: 20px; margin: 12px 0;
             border: 2px dashed rgba(249, 212, 35, 0.3);
             text-shadow: 0 0 30px rgba(249, 212, 35, 0.4);
         }
 
-        /* Player List */
         .player-list {
-            background: rgba(0,0,0,0.3);
-            border-radius: var(--radius);
-            padding: 8px;
-            margin: 8px 0;
-            max-height: 220px;
-            overflow-y: auto;
+            background: rgba(0,0,0,0.3); border-radius: var(--radius);
+            padding: 8px; margin: 8px 0; max-height: 220px; overflow-y: auto;
         }
 
         .player-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
-            margin: 2px 0;
-            transition: background 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px; margin: 2px 0; transition: background 0.2s;
         }
 
-        .player-item:hover {
-            background: rgba(255,255,255,0.03);
-        }
+        .player-item:hover { background: rgba(255,255,255,0.03); }
 
         .player-name {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: 600; display: flex; align-items: center; gap: 8px;
         }
 
         .host-badge {
-            background: var(--gold);
-            color: #000;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 700;
+            background: var(--gold); color: #000; padding: 3px 8px;
+            border-radius: 12px; font-size: 0.7rem; font-weight: 700;
         }
 
         .kick-btn {
-            width: auto !important;
-            padding: 6px 12px !important;
-            font-size: 0.75rem !important;
-            background: rgba(255,60,60,0.3) !important;
-            color: #ff6b6b !important;
-            border-radius: 8px !important;
+            width: auto !important; padding: 6px 12px !important;
+            font-size: 0.75rem !important; background: rgba(255,60,60,0.3) !important;
+            color: #ff6b6b !important; border-radius: 8px !important;
         }
 
-        /* Timer */
-        .timer-container {
-            text-align: center;
-            padding: 20px 0;
-        }
+        .timer-container { text-align: center; padding: 20px 0; }
 
         .timer-display {
-            font-size: 5rem;
-            font-weight: 900;
-            color: var(--gold);
-            font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 40px rgba(249, 212, 35, 0.5);
-            letter-spacing: 2px;
-            transition: color 0.3s;
+            font-size: 5rem; font-weight: 900; color: var(--gold);
+            font-variant-numeric: tabular-nums; text-shadow: 0 0 40px rgba(249, 212, 35, 0.5);
+            letter-spacing: 2px; transition: color 0.3s; text-align: center; margin: 10px 0;
         }
 
-        .timer-display.running {
-            color: var(--green);
-            text-shadow: 0 0 40px rgba(74, 222, 128, 0.5);
-        }
+        .timer-display.running { color: var(--green); text-shadow: 0 0 40px rgba(74, 222, 128, 0.5); }
 
         .countdown-display {
-            font-size: 7rem;
-            font-weight: 900;
-            animation: countPulse 0.4s infinite;
-            text-shadow: 0 0 50px currentColor;
+            font-size: 7rem; font-weight: 900; text-align: center;
+            animation: countPulse 0.4s infinite; text-shadow: 0 0 50px currentColor;
         }
 
         @keyframes countPulse {
@@ -266,27 +153,14 @@
             50% { transform: scale(1.08); opacity: 0.8; }
         }
 
-        .target-display {
-            font-size: 1.1rem;
-            color: var(--text2);
-            margin: 8px 0;
-        }
-
-        .target-value {
-            color: var(--gold);
-            font-weight: 700;
-            font-size: 1.3rem;
-        }
+        .target-display { text-align: center; color: var(--text2); font-size: 1.1rem; margin: 8px 0; }
+        .target-value { color: var(--gold); font-weight: 700; font-size: 1.3rem; }
 
         .stop-btn {
-            background: #ff4444 !important;
-            color: white !important;
-            font-size: 1.6rem !important;
-            padding: 22px !important;
-            font-weight: 800 !important;
-            letter-spacing: 2px !important;
-            animation: stopPulse 0.8s infinite;
-            border-radius: 20px !important;
+            background: #ff4444 !important; color: white !important;
+            font-size: 1.6rem !important; padding: 22px !important;
+            font-weight: 800 !important; letter-spacing: 2px !important;
+            animation: stopPulse 0.8s infinite; border-radius: 20px !important;
         }
 
         @keyframes stopPulse {
@@ -294,220 +168,121 @@
             50% { box-shadow: 0 0 50px rgba(255, 68, 68, 0.9); }
         }
 
-        /* VS Display */
         .vs-display {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            border-radius: var(--radius);
-            margin: 10px 0;
+            display: flex; align-items: center; justify-content: center;
+            gap: 16px; font-size: 1.3rem; font-weight: 700;
+            padding: 15px; background: rgba(0,0,0,0.3);
+            border-radius: var(--radius); margin: 10px 0;
         }
 
-        .vs-text {
-            color: var(--red);
-            font-size: 1.8rem;
-            font-weight: 900;
-        }
+        .vs-text { color: var(--red); font-size: 1.8rem; font-weight: 900; }
 
-        /* Result */
         .result-display {
-            text-align: center;
-            font-size: 1.4rem;
-            padding: 15px;
-            background: rgba(249, 212, 35, 0.1);
-            border-radius: var(--radius);
-            border: 1px solid rgba(249, 212, 35, 0.3);
-            margin: 15px 0;
+            text-align: center; font-size: 1.4rem; padding: 15px;
+            background: rgba(249, 212, 35, 0.1); border-radius: var(--radius);
+            border: 1px solid rgba(249, 212, 35, 0.3); margin: 15px 0;
             animation: fadeIn 0.5s ease;
         }
 
-        .winner-name {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--gold);
-        }
+        .winner-name { font-size: 1.8rem; font-weight: 900; color: var(--gold); }
 
-        /* Champions */
         .champion-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(249, 212, 35, 0.08);
-            border-radius: 12px;
-            margin: 4px 0;
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; background: rgba(249, 212, 35, 0.08);
+            border-radius: 12px; margin: 4px 0;
         }
 
-        .champion-crown {
-            font-size: 1.5rem;
-        }
+        .champion-crown { font-size: 1.5rem; }
 
-        /* Chat */
         .chat-box {
-            background: rgba(0,0,0,0.3);
-            border-radius: var(--radius);
-            padding: 10px;
-            height: 130px;
-            overflow-y: auto;
-            margin: 8px 0;
-            font-size: 0.85rem;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            background: rgba(0,0,0,0.3); border-radius: var(--radius);
+            padding: 10px; height: 130px; overflow-y: auto;
+            margin: 8px 0; font-size: 0.85rem;
+            display: flex; flex-direction: column; gap: 4px;
         }
 
         .chat-msg {
-            padding: 6px 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            max-width: 85%;
+            padding: 6px 10px; background: rgba(255,255,255,0.05);
+            border-radius: 10px; max-width: 85%;
         }
 
         .chat-msg.own {
-            align-self: flex-end;
-            background: rgba(249, 212, 35, 0.1);
+            align-self: flex-end; background: rgba(249, 212, 35, 0.1);
         }
 
-        .chat-msg .sender {
-            font-weight: 700;
-            font-size: 0.75rem;
-            color: var(--gold);
-        }
+        .chat-msg .sender { font-weight: 700; font-size: 0.75rem; color: var(--gold); }
 
-        /* Settings */
         .settings-group {
-            background: rgba(255,255,255,0.03);
-            border-radius: var(--radius);
-            padding: 14px;
-            margin: 10px 0;
+            background: rgba(255,255,255,0.03); border-radius: var(--radius);
+            padding: 14px; margin: 10px 0;
         }
 
         .settings-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            font-size: 0.9rem;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; font-size: 0.9rem;
         }
 
         .settings-row input[type="checkbox"] {
-            width: 50px;
-            height: 28px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255,255,255,0.15);
-            border-radius: 14px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s;
+            width: 50px; height: 28px; -webkit-appearance: none; appearance: none;
+            background: rgba(255,255,255,0.15); border-radius: 14px;
+            position: relative; cursor: pointer; transition: all 0.3s;
         }
 
-        .settings-row input[type="checkbox"]:checked {
-            background: var(--gold);
-        }
+        .settings-row input[type="checkbox"]:checked { background: var(--gold); }
 
         .settings-row input[type="checkbox"]::before {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: white;
-            top: 2px;
-            left: 2px;
+            content: ''; position: absolute; width: 24px; height: 24px;
+            border-radius: 50%; background: white; top: 2px; left: 2px;
             transition: all 0.3s;
         }
 
-        .settings-row input[type="checkbox"]:checked::before {
-            left: 24px;
-        }
+        .settings-row input[type="checkbox"]:checked::before { left: 24px; }
 
-        .settings-row input[type="number"] {
-            width: 70px;
-            text-align: center;
-            padding: 8px;
-        }
+        .settings-row input[type="number"] { width: 70px; text-align: center; padding: 8px; }
 
-        /* Tabs */
         .tab-bar {
-            display: flex;
-            gap: 4px;
-            margin: 10px 0;
-            background: rgba(0,0,0,0.3);
-            border-radius: var(--radius);
-            padding: 4px;
+            display: flex; gap: 4px; margin: 10px 0;
+            background: rgba(0,0,0,0.3); border-radius: var(--radius); padding: 4px;
         }
 
         .tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-            border: none;
-            background: transparent;
-            color: var(--text2);
+            flex: 1; padding: 10px; text-align: center; border-radius: 12px;
+            cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            transition: all 0.3s; border: none; background: transparent; color: var(--text2);
         }
 
-        .tab.active {
-            background: rgba(249, 212, 35, 0.15);
-            color: var(--gold);
-        }
+        .tab.active { background: rgba(249, 212, 35, 0.15); color: var(--gold); }
 
-        /* Ping */
         .ping-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.7rem;
-            color: var(--text2);
-            padding: 4px 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.7rem; color: var(--text2);
+            padding: 4px 8px; background: rgba(0,0,0,0.3); border-radius: 10px;
         }
 
-        .ping-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--green);
-        }
+        .ping-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+        .ping-dot.slow { background: #ff4444; }
 
-        .ping-dot.slow {
-            background: #ff4444;
-        }
-
-        /* Game History */
         .history-item {
-            padding: 8px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
+        .training-rating {
+            font-size: 2rem; font-weight: 900; text-align: center;
+            padding: 20px; animation: bounceIn 0.5s ease;
         }
 
-        /* Mobile */
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
         @media (max-width: 400px) {
             .timer-display { font-size: 3.5rem; }
             .countdown-display { font-size: 5rem; }
@@ -527,7 +302,7 @@
             </div>
         </div>
 
-        <!-- Ana Menü -->
+        <!-- ANA MENÜ -->
         <div id="menuScreen" class="screen active">
             <div class="input-group">
                 <input type="text" id="playerNameInput" placeholder="🎮 İsminizi girin" maxlength="20" autocomplete="off">
@@ -538,6 +313,7 @@
                 <button class="tab" onclick="switchTab('training')">🏋️ Antrenman</button>
             </div>
 
+            <!-- Online Sekmesi -->
             <div id="onlineTab">
                 <div class="settings-group" id="createSettings" style="display:none">
                     <div class="card-header">⚙️ Oda Ayarları</div>
@@ -568,6 +344,7 @@
                 <button onclick="joinRoom()">🚪 Odaya Katıl</button>
             </div>
 
+            <!-- Antrenman Sekmesi -->
             <div id="trainingTab" style="display:none">
                 <div class="settings-group">
                     <div class="card-header">🏋️ Antrenman Ayarları</div>
@@ -588,7 +365,7 @@
             </div>
         </div>
 
-        <!-- Lobi -->
+        <!-- LOBİ -->
         <div id="lobbyScreen" class="screen">
             <div class="code-display" id="roomCodeDisplay">------</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">
@@ -603,7 +380,6 @@
 
             <button onclick="startTournament()" id="startTournamentBtn" style="display:none">🚀 Turnuvayı Başlat</button>
 
-            <!-- Tabs for lobby -->
             <div class="tab-bar">
                 <button class="tab active" onclick="switchLobbyTab('chat')">💬 Sohbet</button>
                 <button class="tab" onclick="switchLobbyTab('champions')">🏆 Şampiyonlar</button>
@@ -629,7 +405,7 @@
             <button onclick="leaveRoom()" class="secondary">🚪 Odadan Ayrıl</button>
         </div>
 
-        <!-- Yarışma -->
+        <!-- YARIŞMA -->
         <div id="matchScreen" class="screen">
             <div id="countdownDisplay" class="countdown-display" style="display:none"></div>
             <div id="matchInfo" style="text-align:center;font-weight:700;margin:8px;font-size:1.1rem;color:var(--gold)"></div>
@@ -652,10 +428,10 @@
             
             <div id="resultDisplay" class="result-display" style="display:none"></div>
             
-            <button onclick="forceEndTournament()" class="danger" id="forceEndBtn" style="display:none">⛔ Oyunu Bitir</button>
+            <button onclick="forceEndTournament()" class="danger" id="forceEndBtn" style="display:none">⛔ Oyunu Bitir (Lobiye Dön)</button>
         </div>
 
-        <!-- Bekleme -->
+        <!-- BEKLEME -->
         <div id="waitingScreen" class="screen">
             <div style="text-align:center;padding:30px">
                 <div style="font-size:3rem">⏳</div>
@@ -665,10 +441,10 @@
             </div>
         </div>
 
-        <!-- Antrenman -->
+        <!-- ANTRENMAN -->
         <div id="trainingScreen" class="screen">
             <div id="trainCountdown" class="countdown-display" style="display:none"></div>
-            <div style="text-align:center;font-weight:700;color:var(--blue);margin:8px">🏋️ ANTRENMAN MODU</div>
+            <div style="text-align:center;font-weight:700;color:var(--blue);margin:8px;font-size:1.2rem">🏋️ ANTRENMAN MODU</div>
             
             <div class="target-display">
                 🎯 Hedef: <span class="target-value" id="trainTargetDisplay">--</span> saniye
@@ -681,6 +457,8 @@
             <button class="stop-btn" id="trainStopBtn" onclick="stopTraining()" style="display:none">DURDUR!</button>
             
             <div id="trainResultDisplay" class="result-display" style="display:none"></div>
+            <div id="trainRatingDisplay" class="training-rating" style="display:none"></div>
+            <div id="trainNextInfo" style="text-align:center;color:var(--text2);margin-top:10px;display:none">⏳ Yeni tur hazırlanıyor...</div>
             
             <button onclick="endTraining()" class="secondary" style="margin-top:10px">🏠 Ana Menüye Dön</button>
         </div>
@@ -688,34 +466,20 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // ============ GLOBAL STATE ============
         const socket = io();
-        let playerName = '';
-        let roomCode = '';
-        let isHost = false;
-        let timerInterval = null;
-        let timerStartTime = 0;
-        let targetTime = 0;
-        let myResult = null;
-        let currentState = null;
-        let isCountingDown = false;
-        let timerStarted = false;
-        let trainingMode = false;
-        let trainingStartTime = 0;
-        let trainingTargetTime = 0;
+        let playerName = '', roomCode = '', isHost = false;
+        let timerInterval = null, timerStartTime = 0, targetTime = 0, myResult = null;
+        let currentState = null, isCountingDown = false, timerStarted = false;
+        let trainingMode = false, trainingStartTime = 0, trainingTargetTime = 0, trainingUseDecimal = true;
 
-        // ============ AUDIO SYSTEM ============
+        // ============ SES SİSTEMİ ============
         let audioCtx = null;
         
         function initAudio() {
             if (!audioCtx) {
-                try {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                } catch(e) { console.log('Audio:', e); }
+                try { audioCtx = new (window.AudioContext || window.webkitAudioContext()); } catch(e) {}
             }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             return audioCtx;
         }
 
@@ -736,27 +500,26 @@
             } catch(e) {}
         }
 
-        function soundTick() { playBeep(1000, 0.1, 'square', 0.6); }
-        function soundGo() { playBeep(1500, 0.3, 'square', 0.8); playBeep(2000, 0.2, 'square', 0.6); }
-        function soundWin() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playBeep(f, 0.3, 'triangle', 0.7), i * 120)); }
-        function soundChampion() { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => setTimeout(() => playBeep(f, 0.4, 'triangle', 0.8), i * 180)); }
-        function soundClick() { playBeep(800, 0.05, 'sine', 0.3); }
-        function soundError() { playBeep(150, 0.3, 'sawtooth', 0.6); }
-        function soundStop() { playBeep(1200, 0.1, 'square', 0.6); playBeep(900, 0.1, 'square', 0.5); }
+        function sndTick() { playBeep(1000, 0.1, 'square', 0.6); }
+        function sndGo() { playBeep(1500, 0.3, 'square', 0.8); setTimeout(() => playBeep(2000, 0.2, 'square', 0.6), 150); }
+        function sndWin() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playBeep(f, 0.3, 'triangle', 0.7), i * 120)); }
+        function sndChampion() { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => setTimeout(() => playBeep(f, 0.4, 'triangle', 0.8), i * 180)); }
+        function sndClick() { playBeep(800, 0.05, 'sine', 0.3); }
+        function sndError() { playBeep(150, 0.3, 'sawtooth', 0.6); }
+        function sndStop() { playBeep(1200, 0.1, 'square', 0.6); setTimeout(() => playBeep(900, 0.1, 'square', 0.5), 80); }
 
-        // ============ SCREEN MANAGEMENT ============
+        // ============ EKRAN YÖNETİMİ ============
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const el = document.getElementById(id);
-            if (el) el.classList.add('active');
+            document.getElementById(id).classList.add('active');
         }
 
         function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#menuScreen .tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById('onlineTab').style.display = tab === 'online' ? 'block' : 'none';
             document.getElementById('trainingTab').style.display = tab === 'training' ? 'block' : 'none';
-            soundClick();
+            sndClick();
         }
 
         function switchLobbyTab(tab) {
@@ -765,31 +528,25 @@
             document.getElementById('chatTab').style.display = tab === 'chat' ? 'block' : 'none';
             document.getElementById('championsTab').style.display = tab === 'champions' ? 'block' : 'none';
             document.getElementById('historyTab').style.display = tab === 'history' ? 'block' : 'none';
-            soundClick();
+            sndClick();
         }
 
-        // ============ FORMATTERS ============
-        function formatTarget(ms, useDecimal) {
-            return useDecimal ? (ms / 1000).toFixed(2) : Math.round(ms / 1000).toString();
-        }
+        // ============ FORMAT ============
+        function fmtTarget(ms, dec) { return dec ? (ms / 1000).toFixed(2) : Math.round(ms / 1000).toString(); }
+        function fmtTimer(ms) { return (ms / 1000).toFixed(2); }
 
-        function formatTimer(ms) {
-            return (ms / 1000).toFixed(2);
-        }
-
-        // ============ ROOM OPERATIONS ============
+        // ============ ODA İŞLEMLERİ ============
         function showCreateSettings() {
-            soundClick();
+            sndClick();
             document.getElementById('createSettings').style.display = 'block';
             document.getElementById('showSettingsBtn').style.display = 'none';
             document.getElementById('createRoomBtn').style.display = 'block';
         }
 
         function createRoom() {
-            soundClick();
+            sndClick();
             playerName = document.getElementById('playerNameInput').value.trim();
-            if (!playerName) { soundError(); alert('İsim girin!'); return; }
-            
+            if (!playerName) { sndError(); alert('İsim girin!'); return; }
             socket.emit('createRoom', {
                 playerName,
                 settings: {
@@ -802,74 +559,106 @@
         }
 
         function joinRoom() {
-            soundClick();
+            sndClick();
             playerName = document.getElementById('playerNameInput').value.trim();
             const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
-            if (!playerName || !code) { soundError(); alert('İsim ve kod girin!'); return; }
+            if (!playerName || !code) { sndError(); alert('İsim ve kod girin!'); return; }
             socket.emit('joinRoom', { code, playerName });
         }
 
         function startTournament() {
-            soundClick();
-            if (confirm('Turnuvayı başlat?')) socket.emit('startTournament');
+            sndClick();
+            if (confirm('Turnuvayı başlatmak istediğinize emin misiniz?')) socket.emit('startTournament');
         }
 
-        function leaveRoom() { soundClick(); location.reload(); }
+        function leaveRoom() { sndClick(); location.reload(); }
 
         function forceEndTournament() {
-            soundClick();
+            sndClick();
             if (confirm('Oyunu bitirip lobiye dönmek istiyor musunuz?')) socket.emit('forceEndTournament');
         }
 
-        // ============ TIMER OPERATIONS ============
+        // ============ KRONOMETRE ============
         function stopTimer() {
             if (myResult || isCountingDown || !timerStarted) return;
-            soundStop();
-            myResult = true;
-            timerStarted = false;
+            sndStop();
+            myResult = true; timerStarted = false;
             socket.emit('stopTimer', { stopTime: Date.now() });
             clearInterval(timerInterval);
             document.getElementById('stopButton').style.opacity = '0.5';
             document.getElementById('stopButton').textContent = '⏳ Bekleniyor...';
         }
 
-        function startCountdown() {
-            socket.emit('startCountdown');
-        }
-
-        // ============ TRAINING ============
+        // ============ ANTRENMAN ============
         function startTraining() {
-            soundClick();
+            sndClick();
             const settings = {
                 timerMin: parseInt(document.getElementById('trainMin').value) || 5,
                 timerMax: parseInt(document.getElementById('trainMax').value) || 20,
                 useDecimal: document.getElementById('trainDecimal').checked
             };
+            trainingUseDecimal = settings.useDecimal;
             socket.emit('startTraining', settings);
         }
 
         function stopTraining() {
             if (!trainingMode || isCountingDown) return;
-            soundStop();
+            sndStop();
             trainingMode = false;
             clearInterval(timerInterval);
             socket.emit('stopTraining', {
                 stopTime: Date.now(),
                 startTime: trainingStartTime,
-                targetTime: trainingTargetTime
+                targetTime: trainingTargetTime,
+                timerMin: parseInt(document.getElementById('trainMin').value) || 5,
+                timerMax: parseInt(document.getElementById('trainMax').value) || 20
             });
+            document.getElementById('trainStopBtn').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'block';
         }
 
         function endTraining() {
             trainingMode = false;
             clearInterval(timerInterval);
+            socket.emit('stopTrainingMode');
             showScreen('menuScreen');
+            document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'none';
         }
 
-        // ============ SOCKET EVENTS ============
+        // ============ YARIŞMA DURUMU ============
+        function handleMatchState(state) {
+            currentState = state;
+            const players = state.currentPlayers;
+            
+            document.getElementById('countdownDisplay').style.display = 'none';
+            document.getElementById('resultDisplay').style.display = 'none';
+            document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
+            document.getElementById('timerDisplay').classList.remove('running');
+            
+            if (players.includes(playerName)) {
+                showScreen('matchScreen');
+                document.getElementById('matchInfo').textContent = state.roundName || state.currentMatch?.type || 'MAÇ';
+                document.getElementById('player1Name').textContent = players[0];
+                document.getElementById('player2Name').textContent = players[1];
+                document.getElementById('targetTimeDisplay').textContent = fmtTarget(state.targetTime, state.useDecimal);
+                document.getElementById('timerDisplay').textContent = '0.00';
+                document.getElementById('stopButton').style.display = 'block';
+                document.getElementById('stopButton').style.opacity = '1';
+                document.getElementById('stopButton').textContent = 'DURDUR!';
+            } else {
+                showScreen('waitingScreen');
+                document.getElementById('waitingMessage').innerHTML = `
+                    <div style="font-size:1.3rem">${players[0]} <span style="color:#f83600">VS</span> ${players[1]}</div>
+                    <div style="margin-top:8px">${state.roundName || ''}</div>
+                `;
+            }
+        }
+
+        // ============ SOCKET OLAYLARI ============
         socket.on('roomCreated', (data) => {
-            roomCode = data.code;
-            isHost = true;
+            roomCode = data.code; isHost = true;
             document.getElementById('roomCodeDisplay').textContent = roomCode;
             document.getElementById('hostBadge').style.display = 'inline-block';
             document.getElementById('startTournamentBtn').style.display = 'block';
@@ -880,7 +669,7 @@
             updateHistory(data.gameHistory);
             document.getElementById('playerCount').textContent = data.players.length;
             showScreen('lobbyScreen');
-            soundClick();
+            sndClick();
         });
 
         socket.on('joinSuccess', (data) => {
@@ -893,13 +682,13 @@
             updateHistory(data.gameHistory);
             document.getElementById('playerCount').textContent = data.players.length;
             showScreen('lobbyScreen');
-            soundClick();
+            sndClick();
         });
 
         socket.on('playerJoined', (players) => {
             updatePlayers(players);
             document.getElementById('playerCount').textContent = players.length;
-            soundClick();
+            sndClick();
         });
 
         socket.on('playerLeft', (players) => {
@@ -907,18 +696,16 @@
             document.getElementById('playerCount').textContent = players.length;
         });
 
-        socket.on('playerKicked', (players) => {
-            updatePlayers(players);
-            document.getElementById('playerCount').textContent = players.length;
-        });
+        socket.on('playerKicked', (players) => updatePlayers(players));
 
-        socket.on('kicked', () => { soundError(); alert('Atıldınız!'); location.reload(); });
-        socket.on('roomClosed', (data) => { soundError(); alert(data.message); location.reload(); });
+        socket.on('kicked', () => { sndError(); alert('Odadan atıldınız!'); location.reload(); });
+
+        socket.on('roomClosed', (data) => { sndError(); alert(data.message); location.reload(); });
 
         socket.on('tournamentStarted', (state) => {
             currentState = state;
             handleMatchState(state);
-            if (isHost) setTimeout(startCountdown, 500);
+            if (isHost) setTimeout(() => socket.emit('startCountdown'), 500);
         });
 
         socket.on('countdown', (data) => {
@@ -930,14 +717,14 @@
                 cd.style.color = '#4ade80';
                 isCountingDown = false;
                 timerStarted = true;
-                soundGo();
+                sndGo();
                 setTimeout(() => { cd.style.display = 'none'; }, 200);
             } else {
                 cd.textContent = data.count;
                 cd.style.color = '#ff4444';
                 isCountingDown = true;
                 timerStarted = false;
-                soundTick();
+                sndTick();
             }
         });
 
@@ -950,19 +737,19 @@
             
             if (currentState && currentState.currentPlayers.includes(playerName)) {
                 showScreen('matchScreen');
-                document.getElementById('targetTimeDisplay').textContent = formatTarget(targetTime, currentState.useDecimal);
+                document.getElementById('targetTimeDisplay').textContent = fmtTarget(targetTime, currentState.useDecimal);
                 document.getElementById('timerDisplay').textContent = '0.00';
+                document.getElementById('timerDisplay').classList.add('running');
                 document.getElementById('stopButton').style.display = 'block';
                 document.getElementById('stopButton').style.opacity = '1';
                 document.getElementById('stopButton').textContent = 'DURDUR!';
                 document.getElementById('resultDisplay').style.display = 'none';
                 document.getElementById('countdownDisplay').style.display = 'none';
                 document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
-                document.getElementById('timerDisplay').classList.add('running');
                 
                 clearInterval(timerInterval);
                 const update = () => {
-                    document.getElementById('timerDisplay').textContent = formatTimer(Math.max(0, Date.now() - timerStartTime));
+                    document.getElementById('timerDisplay').textContent = fmtTimer(Math.max(0, Date.now() - timerStartTime));
                 };
                 update();
                 timerInterval = setInterval(update, 10);
@@ -972,7 +759,7 @@
         socket.on('roundResult', (result) => {
             clearInterval(timerInterval);
             timerStarted = false;
-            soundWin();
+            sndWin();
             document.getElementById('timerDisplay').classList.remove('running');
             
             if (currentState?.currentPlayers.includes(playerName)) {
@@ -980,7 +767,7 @@
                 document.getElementById('resultDisplay').style.display = 'block';
                 let html = `🏆 <span class="winner-name">${result.winner}</span> kazandı!<br>`;
                 if (result.tieBreak) html += `<small style="color:#ff4444">⚠️ Salise farkıyla!</small><br>`;
-                html += `<small>${formatTimer(result.results[result.winner].elapsed)}s (fark: ${formatTimer(result.results[result.winner].difference)}s)</small>`;
+                html += `<small>${fmtTimer(result.results[result.winner].elapsed)}s (fark: ${fmtTimer(result.results[result.winner].difference)}s)</small>`;
                 document.getElementById('resultDisplay').innerHTML = html;
             }
         });
@@ -988,13 +775,13 @@
         socket.on('nextRound', (state) => {
             currentState = state;
             handleMatchState(state);
-            if (isHost) setTimeout(startCountdown, 1000);
+            if (isHost) setTimeout(() => socket.emit('startCountdown'), 1000);
         });
 
         socket.on('tournamentEnd', (data) => {
             clearInterval(timerInterval);
             timerStarted = false;
-            soundChampion();
+            sndChampion();
             document.getElementById('timerDisplay').classList.remove('running');
             
             showScreen('matchScreen');
@@ -1018,7 +805,8 @@
 
         socket.on('tournamentForceEnd', (data) => {
             clearInterval(timerInterval);
-            soundError();
+            timerStarted = false;
+            sndError();
             alert(data.message);
             updateChampions(data.champions);
             updateHistory(data.gameHistory);
@@ -1033,7 +821,7 @@
                 const isOwn = data.player === playerName;
                 box.innerHTML += `<div class="chat-msg ${isOwn ? 'own' : ''}"><span class="sender">${data.player}</span> ${data.message}</div>`;
                 box.scrollTop = box.scrollHeight;
-                if (!isOwn) soundClick();
+                if (!isOwn) sndClick();
             }
         });
 
@@ -1042,17 +830,19 @@
             document.getElementById('resultDisplay').innerHTML = '⏳ Rakip bekleniyor...';
         });
 
-        socket.on('error', (msg) => { soundError(); alert(msg); });
+        socket.on('error', (msg) => { sndError(); alert(msg); });
 
-        // ============ TRAINING EVENTS ============
+        // ============ ANTRENMAN OLAYLARI ============
         socket.on('trainingStarted', (data) => {
             trainingTargetTime = data.targetTime;
             showScreen('trainingScreen');
-            document.getElementById('trainTargetDisplay').textContent = formatTarget(data.targetTime, data.useDecimal);
+            document.getElementById('trainTargetDisplay').textContent = fmtTarget(data.targetTime, data.useDecimal);
             document.getElementById('trainTimerDisplay').textContent = '0.00';
             document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
             document.getElementById('trainStopBtn').style.display = 'none';
             document.getElementById('trainCountdown').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'none';
             setTimeout(() => socket.emit('startTrainingCountdown'), 500);
         });
 
@@ -1063,13 +853,13 @@
                 cd.textContent = 'BAŞLA!';
                 cd.style.color = '#4ade80';
                 isCountingDown = false;
-                soundGo();
+                sndGo();
                 setTimeout(() => { cd.style.display = 'none'; }, 200);
             } else {
                 cd.textContent = data.count;
                 cd.style.color = '#ff4444';
                 isCountingDown = true;
-                soundTick();
+                sndTick();
             }
         });
 
@@ -1079,10 +869,13 @@
             isCountingDown = false;
             document.getElementById('trainStopBtn').style.display = 'block';
             document.getElementById('trainCountdown').style.display = 'none';
+            document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'none';
             
             clearInterval(timerInterval);
             const update = () => {
-                document.getElementById('trainTimerDisplay').textContent = formatTimer(Math.max(0, Date.now() - trainingStartTime));
+                document.getElementById('trainTimerDisplay').textContent = fmtTimer(Math.max(0, Date.now() - trainingStartTime));
             };
             update();
             timerInterval = setInterval(update, 10);
@@ -1091,58 +884,48 @@
         socket.on('trainingResult', (data) => {
             clearInterval(timerInterval);
             trainingMode = false;
-            document.getElementById('trainStopBtn').style.display = 'none';
+            
             document.getElementById('trainResultDisplay').style.display = 'block';
             document.getElementById('trainResultDisplay').innerHTML = `
-                ⏱️ Süren: <b>${formatTimer(data.elapsed)}s</b><br>
-                🎯 Hedef: ${formatTimer(data.targetTime)}s<br>
-                📊 Fark: ${formatTimer(data.difference)}s
+                ⏱️ Süren: <b>${fmtTimer(data.elapsed)}s</b><br>
+                🎯 Hedef: ${fmtTimer(data.targetTime)}s<br>
+                📊 Fark: ${fmtTimer(data.difference)}s (%${data.percentage})
             `;
-            soundClick();
+            
+            document.getElementById('trainRatingDisplay').style.display = 'block';
+            document.getElementById('trainRatingDisplay').innerHTML = `
+                <div style="font-size:3rem">${data.emoji}</div>
+                <div style="color:${data.color};font-size:1.5rem">${data.rating}</div>
+            `;
+            
+            sndWin();
+            document.getElementById('trainNextInfo').style.display = 'block';
+        });
+
+        socket.on('trainingNewRound', (data) => {
+            trainingTargetTime = data.targetTime;
+            document.getElementById('trainTargetDisplay').textContent = fmtTarget(data.targetTime, data.useDecimal);
+            document.getElementById('trainTimerDisplay').textContent = '0.00';
+            document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
+            document.getElementById('trainStopBtn').style.display = 'none';
+            document.getElementById('trainCountdown').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'none';
+            trainingUseDecimal = data.useDecimal;
+            setTimeout(() => socket.emit('startTrainingCountdown'), 800);
         });
 
         // ============ PING ============
-        setInterval(() => {
-            socket.emit('ping-check', { clientTime: Date.now() });
-        }, 5000);
+        setInterval(() => { socket.emit('ping-check', { clientTime: Date.now() }); }, 5000);
 
         socket.on('pong-check', (data) => {
             const ping = Date.now() - data.clientTime;
             document.getElementById('pingDisplay').style.display = 'inline-flex';
             document.getElementById('pingValue').textContent = ping;
-            const dot = document.getElementById('pingDot');
-            dot.className = 'ping-dot' + (ping > 200 ? ' slow' : '');
+            document.getElementById('pingDot').className = 'ping-dot' + (ping > 200 ? ' slow' : '');
         });
 
-        // ============ HELPERS ============
-        function handleMatchState(state) {
-            currentState = state;
-            const players = state.currentPlayers;
-            
-            document.getElementById('countdownDisplay').style.display = 'none';
-            document.getElementById('resultDisplay').style.display = 'none';
-            document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
-            document.getElementById('timerDisplay').classList.remove('running');
-            
-            if (players.includes(playerName)) {
-                showScreen('matchScreen');
-                document.getElementById('matchInfo').textContent = state.roundName || state.currentMatch?.type || 'MAÇ';
-                document.getElementById('player1Name').textContent = players[0];
-                document.getElementById('player2Name').textContent = players[1];
-                document.getElementById('targetTimeDisplay').textContent = formatTarget(state.targetTime, state.useDecimal);
-                document.getElementById('timerDisplay').textContent = '0.00';
-                document.getElementById('stopButton').style.display = 'block';
-                document.getElementById('stopButton').style.opacity = '1';
-                document.getElementById('stopButton').textContent = 'DURDUR!';
-            } else {
-                showScreen('waitingScreen');
-                document.getElementById('waitingMessage').innerHTML = `
-                    <div style="font-size:1.3rem">${players[0]} <span style="color:#f83600">VS</span> ${players[1]}</div>
-                    <div style="margin-top:8px">${state.roundName || ''}</div>
-                `;
-            }
-        }
-
+        // ============ YARDIMCI FONKSİYONLAR ============
         function updatePlayers(players) {
             const list = document.getElementById('lobbyPlayerList');
             if (!list || !players) return;
@@ -1164,9 +947,9 @@
             if (champions.length === 0) {
                 list.innerHTML = '<div style="color:var(--text2);padding:10px">Henüz şampiyon yok</div>';
             } else {
-                list.innerHTML = champions.map((c, i) => `
+                list.innerHTML = champions.map(c => `
                     <div class="champion-item">
-                        <span class="champion-crown">🏆</span>
+                        <span style="font-size:1.5rem">🏆</span>
                         <span style="font-weight:700">${c.name}</span>
                         <small style="color:var(--text2);margin-left:auto">${c.date}</small>
                     </div>
@@ -1181,16 +964,17 @@
                 list.innerHTML = '<div style="color:var(--text2);padding:10px">Henüz oyun oynanmadı</div>';
             } else {
                 list.innerHTML = history.slice(-10).reverse().map(h => `
-                    <div class="history-item">
-                        <span>👑 <b>${h.champion}</b></span>
-                        <small style="color:var(--text2)">${h.players?.length || '?'} oyuncu</small>
+                    <div class="champion-item">
+                        <span>👑</span>
+                        <b>${h.champion}</b>
+                        <small style="color:var(--text2);margin-left:auto">${h.players?.length || '?'} oyuncu</small>
                     </div>
                 `).join('');
             }
         }
 
         function kickPlayer(playerId) {
-            soundClick();
+            sndClick();
             if (confirm('Bu oyuncuyu atmak istiyor musunuz?')) socket.emit('kickPlayer', { playerId });
         }
 
@@ -1200,7 +984,7 @@
             if (msg) { socket.emit('sendMessage', { message: msg }); input.value = ''; }
         }
 
-        // Enter ile mesaj gönder
+        // Enter ile mesaj
         document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
