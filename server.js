@@ -42,7 +42,6 @@ function generateRoomCode() {
   return code;
 }
 
-// ============ TURNUVA SİSTEMİ (3-20 oyuncu) ============
 class Tournament {
   constructor(players, settings = {}) {
     this.players = players;
@@ -58,7 +57,6 @@ class Tournament {
     this.timerStartTime = null;
     this.allPlayers = players;
     this.champion = null;
-    this.bracket = null;
     this.roundName = '';
     this.waitingPlayer = null;
     this.match1 = { winner: null, loser: null };
@@ -66,18 +64,12 @@ class Tournament {
     this.match3 = { winner: null, loser: null };
     this.match4 = { winner: null, loser: null };
     this.currentMatchIndex = 0;
+    this.bracket = null;
     
-    this.buildBracket();
-  }
-
-  buildBracket() {
-    const n = this.playerCount;
-    if (n === 3) {
-      this.bracket = { type: 'special3', matches: [] };
-    } else if (n === 4) {
+    if (this.playerCount === 4) {
       this.bracket = { type: '4players', round1: [], final: null, loserFinal: null, superFinal: null };
-    } else {
-      this.bracket = { type: 'elimination', rounds: [], currentRound: 0, losersBracket: [] };
+    } else if (this.playerCount > 4) {
+      this.bracket = { type: 'elimination', rounds: [], currentRound: 0 };
       this.buildEliminationRounds();
     }
   }
@@ -90,9 +82,7 @@ class Tournament {
       let roundMatches = [];
       let winners = [];
       while (shuffled.length >= 2) {
-        let p1 = shuffled.shift();
-        let p2 = shuffled.shift();
-        roundMatches.push({ player1: p1, player2: p2, winner: null, loser: null });
+        roundMatches.push({ player1: shuffled.shift(), player2: shuffled.shift(), winner: null, loser: null });
       }
       if (shuffled.length === 1) winners.push(shuffled[0]);
       this.bracket.rounds.push({ number: roundNum, matches: roundMatches, winners: winners });
@@ -114,10 +104,10 @@ class Tournament {
   }
 
   start() {
-    return this.playerCount === 3 ? this.start3PlayerMode() : this.startMultiPlayerMode();
+    return this.playerCount === 3 ? this.start3Player() : this.startMultiPlayer();
   }
 
-  start3PlayerMode() {
+  start3Player() {
     const shuffled = [...this.players].sort(() => Math.random() - 0.5);
     this.currentMatch = { player1: shuffled[0], player2: shuffled[1], type: '1. MAÇ', round: 1 };
     this.currentPlayers = [shuffled[0], shuffled[1]];
@@ -129,7 +119,7 @@ class Tournament {
     return this.getState();
   }
 
-  startMultiPlayerMode() {
+  startMultiPlayer() {
     if (this.playerCount === 4) {
       const shuffled = [...this.players].sort(() => Math.random() - 0.5);
       this.bracket.round1 = [
@@ -183,12 +173,12 @@ class Tournament {
   }
 
   advanceRound(winner, loser) {
-    if (this.playerCount === 3) return this.advance3Player(winner, loser);
-    if (this.playerCount === 4) return this.advance4Player(winner, loser);
-    return this.advanceMultiPlayer(winner, loser);
+    if (this.playerCount === 3) return this.advance3P(winner, loser);
+    if (this.playerCount === 4) return this.advance4P(winner, loser);
+    return this.advanceMultiP(winner, loser);
   }
 
-  advance3Player(winner, loser) {
+  advance3P(winner, loser) {
     if (this.step === 1) {
       this.match1 = { winner, loser };
       this.step = 2;
@@ -224,7 +214,7 @@ class Tournament {
     return this.getState();
   }
 
-  advance4Player(winner, loser) {
+  advance4P(winner, loser) {
     const idx = this.currentMatchIndex;
     this.bracket.round1[idx].winner = winner;
     this.bracket.round1[idx].loser = loser;
@@ -265,7 +255,7 @@ class Tournament {
     return this.getState();
   }
 
-  advanceMultiPlayer(winner, loser) {
+  advanceMultiP(winner, loser) {
     const cr = this.bracket.rounds[this.bracket.currentRound];
     if (cr && this.currentMatchIndex < cr.matches.length) {
       cr.matches[this.currentMatchIndex].winner = winner;
@@ -322,7 +312,6 @@ class Tournament {
   }
 }
 
-// ============ SOCKET.IO ============
 io.on('connection', (socket) => {
   console.log('Yeni bağlantı:', socket.id);
   let currentRoom = null;
@@ -330,7 +319,7 @@ io.on('connection', (socket) => {
   let trainingMode = false;
   let trainingSettings = {};
 
-  // ============ ODA İŞLEMLERİ ============
+  // ODA OLUŞTUR
   socket.on('createRoom', (data) => {
     const { playerName: name, settings = {} } = data;
     const code = generateRoomCode();
@@ -355,6 +344,7 @@ io.on('connection', (socket) => {
     console.log(`✅ Oda: ${code} - Host: ${name}`);
   });
 
+  // ODAYA KATIL
   socket.on('joinRoom', (data) => {
     const { code, playerName: name } = data;
     const room = rooms.get(code.toUpperCase());
@@ -370,6 +360,7 @@ io.on('connection', (socket) => {
     console.log(`👤 ${name} katıldı: ${code}`);
   });
 
+  // OYUNCU AT
   socket.on('kickPlayer', (data) => {
     const room = rooms.get(currentRoom);
     if (!room || room.host !== socket.id) return;
@@ -377,6 +368,7 @@ io.on('connection', (socket) => {
     if (ts) { ts.leave(currentRoom); room.players.delete(data.playerId); ts.emit('kicked'); io.to(currentRoom).emit('playerKicked', getPlayersList(room)); }
   });
 
+  // TURNUVA BAŞLAT
   socket.on('startTournament', () => {
     const room = rooms.get(currentRoom);
     if (!room || room.host !== socket.id) return;
@@ -388,7 +380,7 @@ io.on('connection', (socket) => {
     console.log(`🏆 Turnuva başladı: ${currentRoom} (${playerArray.length} oyuncu)`);
   });
 
-  // ============ KRONOMETRE ============
+  // GERİ SAYIM BAŞLAT
   socket.on('startCountdown', () => {
     const room = rooms.get(currentRoom);
     if (!room || !room.tournament || room.host !== socket.id) return;
@@ -407,6 +399,7 @@ io.on('connection', (socket) => {
     }, 1000);
   });
 
+  // KRONOMETRE DURDUR
   socket.on('stopTimer', (data) => {
     const room = rooms.get(currentRoom);
     if (!room || !room.tournament) return;
@@ -430,6 +423,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // OYUNU ZORLA BİTİR
   socket.on('forceEndTournament', () => {
     const room = rooms.get(currentRoom);
     if (!room || room.host !== socket.id) return;
@@ -437,7 +431,7 @@ io.on('connection', (socket) => {
     io.to(currentRoom).emit('tournamentForceEnd', { message: 'Oyun ev sahibi tarafından sonlandırıldı!', players: getPlayersList(room), champions: room.champions, gameHistory: room.gameHistory });
   });
 
-  // ============ ANTRENMAN MODU ============
+  // ANTRENMAN BAŞLAT
   socket.on('startTraining', (settings) => {
     trainingMode = true;
     trainingSettings = settings;
@@ -445,15 +439,15 @@ io.on('connection', (socket) => {
     socket.emit('trainingStarted', { targetTime, useDecimal: settings.useDecimal, timerMin: settings.timerMin, timerMax: settings.timerMax });
   });
 
+  // ANTRENMAN GERİ SAYIM
   socket.on('startTrainingCountdown', () => {
     if (!trainingMode) return;
     let count = 3;
     socket.emit('trainingCountdown', { count });
     const ci = setInterval(() => {
       count--;
-      if (count > 0) {
-        socket.emit('trainingCountdown', { count });
-      } else {
+      if (count > 0) { socket.emit('trainingCountdown', { count }); }
+      else {
         clearInterval(ci);
         socket.emit('trainingCountdown', { count: 'BAŞLA!' });
         socket.emit('trainingTimerStarted', { startTime: Date.now() });
@@ -461,6 +455,7 @@ io.on('connection', (socket) => {
     }, 1000);
   });
 
+  // ANTRENMAN DURDUR
   socket.on('stopTraining', (data) => {
     if (!trainingMode) return;
     const elapsed = data.stopTime - data.startTime;
@@ -486,11 +481,10 @@ io.on('connection', (socket) => {
     }, 2500);
   });
 
-  socket.on('stopTrainingMode', () => {
-    trainingMode = false;
-  });
+  // ANTRENMANI DURDUR
+  socket.on('stopTrainingMode', () => { trainingMode = false; });
 
-  // ============ CHAT ============
+  // CHAT
   socket.on('sendMessage', (data) => {
     if (currentRoom) {
       const room = rooms.get(currentRoom);
@@ -500,12 +494,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ============ PING ============
-  socket.on('ping-check', (data) => {
-    socket.emit('pong-check', { clientTime: data.clientTime, serverTime: Date.now() });
-  });
+  // PING
+  socket.on('ping-check', (data) => { socket.emit('pong-check', { clientTime: data.clientTime, serverTime: Date.now() }); });
 
-  // ============ BAĞLANTI KOPMA ============
+  // BAĞLANTI KOPTU
   socket.on('disconnect', () => {
     if (currentRoom && rooms.has(currentRoom)) {
       const room = rooms.get(currentRoom);
@@ -532,5 +524,6 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('═══════════════════════════════════');
   console.log('🏆 KRONOMETRE TURNUVA v3.0');
   console.log(`📍 Port: ${PORT}`);
+  console.log('✅ 3-20 oyuncu | Antrenman modu');
   console.log('═══════════════════════════════════');
 });
