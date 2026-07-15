@@ -178,32 +178,7 @@
         function stopTraining(){if(!trainingMode)return;trainingMode=false;cancelAnimationFrame(timerInterval);socket.emit('stopTraining',{stopTime:Date.now(),startTime:trainingStartTime,targetTime:trainingTargetTime,timerMin:parseInt(document.getElementById('trainMin').value)||5,timerMax:parseInt(document.getElementById('trainMax').value)||20});document.getElementById('trainStopBtn').style.display='none';}
         function endTraining(){trainingMode=false;cancelAnimationFrame(timerInterval);socket.emit('stopTrainingMode');showScreen('menuScreen');}
 
-        // ============ MAÇ YÖNETİMİ ============
-        function handleMatch(state){
-            currentState=state;
-            const p=state.currentPlayers;
-            const amIPlaying=(p[0]===playerName||p[1]===playerName);
-            
-            document.getElementById('countdownDisplay').style.display='none';
-            document.getElementById('resultDisplay').style.display='none';
-            document.getElementById('forceEndBtn').style.display=isHost?'block':'none';
-            document.getElementById('timerDisplay').classList.remove('running');
-            document.getElementById('stopButton').style.display='none';
-            
-            if(amIPlaying){
-                showScreen('matchScreen');
-                document.getElementById('matchInfo').textContent=state.roundName||'MAÇ';
-                document.getElementById('player1Name').textContent=p[0];
-                document.getElementById('player2Name').textContent=p[1];
-                document.getElementById('targetTimeDisplay').textContent=fmtTarget(state.targetTime,state.useDecimal);
-                document.getElementById('timerDisplay').textContent='0.00';
-            }else{
-                showScreen('waitingScreen');
-                document.getElementById('waitingMessage').innerHTML=`${p[0]} VS ${p[1]}<br>${state.roundName||''}`;
-            }
-        }
-
-        // ============ SOCKET ============
+        // ============ SOCKET OLAYLARI ============
         socket.on('roomCreated',(data)=>{
             roomCode=data.code;isHost=true;
             document.getElementById('roomCodeDisplay').textContent=roomCode;
@@ -223,151 +198,216 @@
         socket.on('playerKicked',(p)=>updatePlayers(p));
         socket.on('kicked',()=>{alert('Atıldınız!');location.reload();});
         socket.on('roomClosed',(d)=>{alert(d.message);location.reload();});
-        socket.on('tournamentStarted',(state)=>{handleMatch(state);if(isHost)setTimeout(()=>socket.emit('startCountdown'),500);});
 
-       socket.on('countdown', (data) => {
-    // Oynayan oyuncu kontrolü
-    const p = currentState?.currentPlayers || [];
-    const amIPlaying = (p[0] === playerName || p[1] === playerName);
-    
-    // SADECE oynayan oyunculara göster
-    if (!amIPlaying) return;
-    
-    const cd = document.getElementById('countdownDisplay');
-    cd.style.display = 'block';
-    
-    if (data.count === 'BAŞLA!') {
-        cd.textContent = 'BAŞLA!';
-        cd.style.color = '#4ade80';
-        isCountingDown = false;
-        timerStarted = true;
-        sndGo();
-        setTimeout(() => { cd.style.display = 'none'; }, 200);
-    } else {
-        cd.textContent = data.count;
-        cd.style.color = '#ff4444';
-        isCountingDown = true;
-        timerStarted = false;
-        sndTick();
-    }
-});
+        // ============ TURNUVA BAŞLADI ============
+        socket.on('tournamentStarted', (state) => {
+            currentState = state;
+            const p = state.currentPlayers;
+            const amIPlaying = (p[0] === playerName || p[1] === playerName);
+            
+            if (amIPlaying) {
+                showScreen('matchScreen');
+                document.getElementById('matchInfo').textContent = state.roundName || 'MAÇ';
+                document.getElementById('player1Name').textContent = p[0];
+                document.getElementById('player2Name').textContent = p[1];
+                document.getElementById('targetTimeDisplay').textContent = fmtTarget(state.targetTime, state.useDecimal);
+                document.getElementById('timerDisplay').textContent = '0.00';
+                document.getElementById('countdownDisplay').style.display = 'none';
+                document.getElementById('resultDisplay').style.display = 'none';
+                document.getElementById('stopButton').style.display = 'none';
+                document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
+            } else {
+                showScreen('waitingScreen');
+                document.getElementById('waitingMessage').innerHTML = p[0] + ' VS ' + p[1] + '<br>' + (state.roundName || '');
+            }
+            
+            if (isHost) setTimeout(() => socket.emit('startCountdown'), 500);
+        });
 
-        socket.on('timerStarted', (data) => {
-    timerStartTime = performance.now();
-    targetTime = data.targetTime;
-    myResult = null;
-    isCountingDown = false;
-    timerStarted = true;
-    
-    // Oynayan oyuncu kontrolü
-    const p = currentState?.currentPlayers || [];
-    const amIPlaying = (p[0] === playerName || p[1] === playerName);
-    
-    // SADECE oynayan oyunculara kronometre göster
-    if (!amIPlaying) return;
-    
-    showScreen('matchScreen');
-    document.getElementById('targetTimeDisplay').textContent = fmtTarget(targetTime, currentState.useDecimal);
-    document.getElementById('timerDisplay').textContent = '0.00';
-    document.getElementById('timerDisplay').classList.add('running');
-    document.getElementById('stopButton').style.display = 'block';
-    document.getElementById('stopButton').style.opacity = '1';
-    document.getElementById('stopButton').textContent = 'DURDUR!';
-    document.getElementById('resultDisplay').style.display = 'none';
-    document.getElementById('countdownDisplay').style.display = 'none';
-    document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
-    
-    cancelAnimationFrame(timerInterval);
-    function upd() {
-        if (!timerStarted) return;
-        document.getElementById('timerDisplay').textContent = fmtTimer(Math.max(0, performance.now() - timerStartTime));
-        if (timerStarted) timerInterval = requestAnimationFrame(upd);
-    }
-    upd();
-});
-        socket.on('roundResult',(result)=>{
-            cancelAnimationFrame(timerInterval);timerStarted=false;sndWin();
-            document.getElementById('timerDisplay').classList.remove('running');
-            if(currentState?.currentPlayers.includes(playerName)){
-                document.getElementById('stopButton').style.display='none';
-                document.getElementById('resultDisplay').style.display='block';
-                document.getElementById('resultDisplay').innerHTML=`🏆 ${result.winner} kazandı!<br><small>${fmtTimer(result.results[result.winner].elapsed)}s</small>`;
+        // ============ GERİ SAYIM ============
+        socket.on('countdown', (data) => {
+            const p = currentState?.currentPlayers || [];
+            if (p[0] !== playerName && p[1] !== playerName) return;
+            
+            const cd = document.getElementById('countdownDisplay');
+            cd.style.display = 'block';
+            
+            if (data.count === 'BAŞLA!') {
+                cd.textContent = 'BAŞLA!';
+                cd.style.color = '#4ade80';
+                isCountingDown = false;
+                timerStarted = true;
+                sndGo();
+                setTimeout(() => { cd.style.display = 'none'; }, 200);
+            } else {
+                cd.textContent = data.count;
+                cd.style.color = '#ff4444';
+                isCountingDown = true;
+                timerStarted = false;
+                sndTick();
             }
         });
 
-        socket.on('nextRound',(state)=>{handleMatch(state);if(isHost)setTimeout(()=>socket.emit('startCountdown'),1000);});
-
-        socket.on('tournamentEnd',(data)=>{
-            cancelAnimationFrame(timerInterval);timerStarted=false;sndChamp();
-            showScreen('matchScreen');
-            document.getElementById('matchInfo').textContent='👑 ŞAMPİYON!';
-            document.getElementById('player1Name').textContent=data.champion;
-            document.getElementById('player2Name').textContent='🏆';
-            document.getElementById('stopButton').style.display='none';
-            document.getElementById('timerDisplay').textContent='👑';
-            document.getElementById('resultDisplay').style.display='block';
-            document.getElementById('resultDisplay').innerHTML=`<div class="winner-name">${data.champion}</div>`;
-            setTimeout(()=>{updateChampions(data.champions);updatePlayers(data.players);showScreen('lobbyScreen');},4000);
+        // ============ KRONOMETRE BAŞLADI ============
+        socket.on('timerStarted', (data) => {
+            const p = currentState?.currentPlayers || [];
+            if (p[0] !== playerName && p[1] !== playerName) return;
+            
+            timerStartTime = performance.now();
+            targetTime = data.targetTime;
+            myResult = null;
+            isCountingDown = false;
+            timerStarted = true;
+            
+            document.getElementById('targetTimeDisplay').textContent = fmtTarget(targetTime, currentState.useDecimal);
+            document.getElementById('timerDisplay').textContent = '0.00';
+            document.getElementById('timerDisplay').classList.add('running');
+            document.getElementById('stopButton').style.display = 'block';
+            document.getElementById('stopButton').style.opacity = '1';
+            document.getElementById('stopButton').textContent = 'DURDUR!';
+            document.getElementById('countdownDisplay').style.display = 'none';
+            
+            cancelAnimationFrame(timerInterval);
+            function upd() {
+                if (!timerStarted) return;
+                document.getElementById('timerDisplay').textContent = fmtTimer(Math.max(0, performance.now() - timerStartTime));
+                timerInterval = requestAnimationFrame(upd);
+            }
+            upd();
         });
 
-        socket.on('tournamentForceEnd',(data)=>{
-            cancelAnimationFrame(timerInterval);alert(data.message);
-            updateChampions(data.champions);updatePlayers(data.players);
+        // ============ SONUÇLAR ============
+        socket.on('roundResult', (result) => {
+            cancelAnimationFrame(timerInterval);
+            timerStarted = false;
+            sndWin();
+            document.getElementById('timerDisplay').classList.remove('running');
+            
+            const p = currentState?.currentPlayers || [];
+            if (p[0] === playerName || p[1] === playerName) {
+                document.getElementById('stopButton').style.display = 'none';
+                document.getElementById('resultDisplay').style.display = 'block';
+                document.getElementById('resultDisplay').innerHTML = '🏆 ' + result.winner + ' kazandı!<br><small>' + fmtTimer(result.results[result.winner].elapsed) + 's</small>';
+            }
+        });
+
+        socket.on('nextRound', (state) => {
+            currentState = state;
+            const p = state.currentPlayers;
+            const amIPlaying = (p[0] === playerName || p[1] === playerName);
+            
+            if (amIPlaying) {
+                showScreen('matchScreen');
+                document.getElementById('matchInfo').textContent = state.roundName || 'MAÇ';
+                document.getElementById('player1Name').textContent = p[0];
+                document.getElementById('player2Name').textContent = p[1];
+                document.getElementById('targetTimeDisplay').textContent = fmtTarget(state.targetTime, state.useDecimal);
+                document.getElementById('timerDisplay').textContent = '0.00';
+                document.getElementById('timerDisplay').classList.remove('running');
+                document.getElementById('countdownDisplay').style.display = 'none';
+                document.getElementById('resultDisplay').style.display = 'none';
+                document.getElementById('stopButton').style.display = 'none';
+                document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
+            } else {
+                showScreen('waitingScreen');
+                document.getElementById('waitingMessage').innerHTML = p[0] + ' VS ' + p[1] + '<br>' + (state.roundName || '');
+            }
+            
+            if (isHost) setTimeout(() => socket.emit('startCountdown'), 1000);
+        });
+
+        socket.on('tournamentEnd', (data) => {
+            cancelAnimationFrame(timerInterval);
+            timerStarted = false;
+            sndChamp();
+            
+            showScreen('matchScreen');
+            document.getElementById('matchInfo').textContent = '👑 ŞAMPİYON!';
+            document.getElementById('player1Name').textContent = data.champion;
+            document.getElementById('player2Name').textContent = '🏆';
+            document.getElementById('stopButton').style.display = 'none';
+            document.getElementById('timerDisplay').textContent = '👑';
+            document.getElementById('timerDisplay').classList.remove('running');
+            document.getElementById('resultDisplay').style.display = 'block';
+            document.getElementById('resultDisplay').innerHTML = '<div class="winner-name">' + data.champion + '</div><div>ŞAMPİYON!</div>';
+            
+            setTimeout(() => {
+                updateChampions(data.champions);
+                updatePlayers(data.players);
+                showScreen('lobbyScreen');
+            }, 4000);
+        });
+
+        socket.on('tournamentForceEnd', (data) => {
+            cancelAnimationFrame(timerInterval);
+            alert(data.message);
+            updateChampions(data.champions);
+            updatePlayers(data.players);
             showScreen('lobbyScreen');
         });
 
-        socket.on('newMessage',(data)=>{
-            const b=document.getElementById('lobbyChat');
-            if(b){b.innerHTML+=`<div><b>${data.player}:</b> ${data.message}</div>`;b.scrollTop=b.scrollHeight;}
+        socket.on('newMessage', (data) => {
+            const b = document.getElementById('lobbyChat');
+            if (b) { b.innerHTML += '<div><b>' + data.player + ':</b> ' + data.message + '</div>'; b.scrollTop = b.scrollHeight; }
         });
 
         // ============ ANTRENMAN ============
-        socket.on('trainingStarted',(data)=>{
-            trainingTargetTime=data.targetTime;
+        socket.on('trainingStarted', (data) => {
+            trainingTargetTime = data.targetTime;
             showScreen('trainingScreen');
-            document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal);
-            document.getElementById('trainTimerDisplay').textContent='0.00';
-            document.getElementById('trainStopBtn').style.display='none';
-            document.getElementById('trainResultDisplay').style.display='none';
-            document.getElementById('trainRatingDisplay').style.display='none';
-            setTimeout(()=>socket.emit('startTrainingCountdown'),500);
+            document.getElementById('trainTargetDisplay').textContent = fmtTarget(data.targetTime, data.useDecimal);
+            document.getElementById('trainTimerDisplay').textContent = '0.00';
+            document.getElementById('trainStopBtn').style.display = 'none';
+            document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
+            setTimeout(() => socket.emit('startTrainingCountdown'), 500);
         });
-        socket.on('trainingCountdown',(data)=>{
-            const cd=document.getElementById('trainCountdown');cd.style.display='block';
-            if(data.count==='BAŞLA!'){cd.textContent='BAŞLA!';cd.style.color='#4ade80';isCountingDown=false;sndGo();setTimeout(()=>cd.style.display='none',200);}
-            else{cd.textContent=data.count;cd.style.color='#ff4444';isCountingDown=true;sndTick();}
+        socket.on('trainingCountdown', (data) => {
+            const cd = document.getElementById('trainCountdown');
+            cd.style.display = 'block';
+            if (data.count === 'BAŞLA!') { cd.textContent = 'BAŞLA!'; cd.style.color = '#4ade80'; isCountingDown = false; sndGo(); setTimeout(() => cd.style.display = 'none', 200); }
+            else { cd.textContent = data.count; cd.style.color = '#ff4444'; isCountingDown = true; sndTick(); }
         });
-        socket.on('trainingTimerStarted',(data)=>{
-            trainingStartTime=performance.now();trainingMode=true;isCountingDown=false;
-            document.getElementById('trainStopBtn').style.display='block';
+        socket.on('trainingTimerStarted', (data) => {
+            trainingStartTime = performance.now();
+            trainingMode = true;
+            isCountingDown = false;
+            document.getElementById('trainStopBtn').style.display = 'block';
             cancelAnimationFrame(timerInterval);
-            function upd(){document.getElementById('trainTimerDisplay').textContent=fmtTimer(Math.max(0,performance.now()-trainingStartTime));if(trainingMode)timerInterval=requestAnimationFrame(upd);}
+            function upd() { document.getElementById('trainTimerDisplay').textContent = fmtTimer(Math.max(0, performance.now() - trainingStartTime)); if (trainingMode) timerInterval = requestAnimationFrame(upd); }
             upd();
         });
-        socket.on('trainingResult',(data)=>{
-            cancelAnimationFrame(timerInterval);trainingMode=false;
-            document.getElementById('trainResultDisplay').style.display='block';
-            document.getElementById('trainResultDisplay').innerHTML=`⏱️ ${fmtTimer(data.elapsed)}s | 🎯 ${fmtTimer(data.targetTime)}s | Fark: ${fmtTimer(data.difference)}s`;
-            document.getElementById('trainRatingDisplay').style.display='block';
-            document.getElementById('trainRatingDisplay').innerHTML=`${data.emoji} ${data.rating}`;
+        socket.on('trainingResult', (data) => {
+            cancelAnimationFrame(timerInterval);
+            trainingMode = false;
+            document.getElementById('trainResultDisplay').style.display = 'block';
+            document.getElementById('trainResultDisplay').innerHTML = '⏱️ ' + fmtTimer(data.elapsed) + 's | 🎯 ' + fmtTimer(data.targetTime) + 's | Fark: ' + fmtTimer(data.difference) + 's';
+            document.getElementById('trainRatingDisplay').style.display = 'block';
+            document.getElementById('trainRatingDisplay').innerHTML = data.emoji + ' ' + data.rating;
             sndWin();
         });
-        socket.on('trainingNewRound',(data)=>{
-            trainingTargetTime=data.targetTime;
-            document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal);
-            document.getElementById('trainTimerDisplay').textContent='0.00';
-            document.getElementById('trainStopBtn').style.display='none';
-            document.getElementById('trainResultDisplay').style.display='none';
-            document.getElementById('trainRatingDisplay').style.display='none';
-            setTimeout(()=>socket.emit('startTrainingCountdown'),800);
+        socket.on('trainingNewRound', (data) => {
+            trainingTargetTime = data.targetTime;
+            document.getElementById('trainTargetDisplay').textContent = fmtTarget(data.targetTime, data.useDecimal);
+            document.getElementById('trainTimerDisplay').textContent = '0.00';
+            document.getElementById('trainStopBtn').style.display = 'none';
+            document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
+            setTimeout(() => socket.emit('startTrainingCountdown'), 800);
         });
 
         // ============ YARDIMCILAR ============
-        function updatePlayers(pl){const l=document.getElementById('lobbyPlayerList');if(l&&pl)l.innerHTML=pl.map(p=>`<div class="player-item"><span>${p.name}${p.isHost?' 👑':''}</span>${isHost&&!p.isHost?`<button class="kick-btn" onclick="kickPlayer('${p.id}')">At</button>`:''}</div>`).join('');}
-        function updateChampions(ch){const l=document.getElementById('championsList');if(l&&ch)l.innerHTML=ch.length===0?'Henüz şampiyon yok':ch.map(c=>`<div>🏆 ${c.name} - ${c.date}</div>`).join('');}
-        function kickPlayer(id){if(confirm('At?'))socket.emit('kickPlayer',{playerId:id});}
-        function sendMessage(){const i=document.getElementById('chatInput');const m=i.value.trim();if(m){socket.emit('sendMessage',{message:m});i.value='';}}
-        document.addEventListener('click',initAudio,{once:false});
+        function updatePlayers(pl) {
+            const l = document.getElementById('lobbyPlayerList');
+            if (l && pl) l.innerHTML = pl.map(p => '<div class="player-item"><span>' + p.name + (p.isHost ? ' 👑' : '') + '</span>' + (isHost && !p.isHost ? '<button class="kick-btn" onclick="kickPlayer(\'' + p.id + '\')">At</button>' : '') + '</div>').join('');
+        }
+        function updateChampions(ch) {
+            const l = document.getElementById('championsList');
+            if (l && ch) l.innerHTML = ch.length === 0 ? 'Henüz şampiyon yok' : ch.map(c => '<div>🏆 ' + c.name + ' - ' + c.date + '</div>').join('');
+        }
+        function kickPlayer(id) { if (confirm('At?')) socket.emit('kickPlayer', { playerId: id }); }
+        function sendMessage() { const i = document.getElementById('chatInput'); const m = i.value.trim(); if (m) { socket.emit('sendMessage', { message: m }); i.value = ''; } }
+        document.addEventListener('click', initAudio, { once: false });
     </script>
 </body>
 </html>
