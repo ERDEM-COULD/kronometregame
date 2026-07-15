@@ -87,7 +87,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header"><h1>🏆 Kronometre Turnuva</h1><div class="version">v5.0 • Mobil Optimize</div><div class="ping-indicator" id="pingDisplay" style="display:none"><span class="ping-dot" id="pingDot"></span><span id="pingValue">--</span>ms</div></div>
+        <div class="header"><h1>🏆 Kronometre Turnuva</h1><div class="version">v6.0 • Anında Durdurma</div><div class="ping-indicator" id="pingDisplay" style="display:none"><span class="ping-dot" id="pingDot"></span><span id="pingValue">--</span>ms</div></div>
 
         <!-- MENÜ -->
         <div id="menuScreen" class="screen active">
@@ -140,7 +140,7 @@
             <div class="vs-display"><span id="player1Name">---</span><span class="vs-text">VS</span><span id="player2Name">---</span></div>
             <div class="target-display">🎯 Hedef: <span class="target-value" id="targetTimeDisplay">--</span> saniye</div>
             <div class="timer-display" id="timerDisplay">0.00</div>
-            <button class="stop-btn" id="stopButton" onclick="stopTimer()" style="display:none">DURDUR!</button>
+            <button class="stop-btn" id="stopButton" onpointerdown="stopTimer()" style="display:none; touch-action:manipulation">DURDUR!</button>
             <div id="resultDisplay" class="result-display" style="display:none"></div>
             <button onclick="forceEndTournament()" class="danger" id="forceEndBtn" style="display:none">⛔ Oyunu Bitir</button>
         </div>
@@ -154,7 +154,7 @@
             <div style="text-align:center;font-weight:700;color:var(--blue);margin:8px;font-size:1.2rem">🏋️ ANTRENMAN MODU</div>
             <div class="target-display">🎯 Hedef: <span class="target-value" id="trainTargetDisplay">--</span> saniye</div>
             <div class="timer-display" id="trainTimerDisplay">0.00</div>
-            <button class="stop-btn" id="trainStopBtn" onclick="stopTraining()" style="display:none">DURDUR!</button>
+            <button class="stop-btn" id="trainStopBtn" onpointerdown="stopTraining()" style="display:none; touch-action:manipulation">DURDUR!</button>
             <div id="trainResultDisplay" class="result-display" style="display:none"></div>
             <div id="trainRatingDisplay" class="training-rating" style="display:none"></div>
             <div id="trainNextInfo" style="text-align:center;color:var(--text2);margin-top:10px;display:none">⏳ Yeni tur hazırlanıyor...</div>
@@ -199,7 +199,7 @@
         function leaveRoom() { sndClick(); location.reload(); }
         function forceEndTournament() { sndClick(); if(confirm('Oyunu bitir?')) socket.emit('forceEndTournament'); }
 
-        // ============ KRONOMETRE (ANINDA DUR - MOBİL OPTİMİZE) ============
+        // ============ KRONOMETRE (onpointerdown + performance.now) ============
         function stopTimer() {
             if (myResult || isCountingDown || !timerStarted) return;
             
@@ -216,23 +216,72 @@
             document.getElementById('resultDisplay').innerHTML = '⏳ Sonuç bekleniyor...';
             
             sndStop();
-            socket.emit('stopTimer', { stopTime: Date.now() });
+            
+            requestAnimationFrame(() => {
+                socket.emit('stopTimer', { stopTime: Date.now() });
+            });
         }
 
         // ============ ANTRENMAN ============
-        function startTraining() { sndClick(); socket.emit('startTraining',{timerMin:parseInt(document.getElementById('trainMin').value)||5,timerMax:parseInt(document.getElementById('trainMax').value)||20,useDecimal:document.getElementById('trainDecimal').checked}); }
-        
-        function stopTraining() {
-            if(!trainingMode||isCountingDown) return;
-            sndStop();
-            trainingMode=false;
+        function startTraining() { 
+            sndClick(); 
+            trainingMode = false; isCountingDown = false; timerStarted = false; myResult = false;
             cancelAnimationFrame(timerInterval);
-            socket.emit('stopTraining',{stopTime:Date.now(),startTime:trainingStartTime,targetTime:trainingTargetTime,timerMin:parseInt(document.getElementById('trainMin').value)||5,timerMax:parseInt(document.getElementById('trainMax').value)||20});
-            document.getElementById('trainStopBtn').style.display='none';
-            document.getElementById('trainNextInfo').style.display='block';
+            document.getElementById('trainResultDisplay').style.display='none';
+            document.getElementById('trainRatingDisplay').style.display='none';
+            document.getElementById('trainNextInfo').style.display='none';
+            socket.emit('startTraining',{timerMin:parseInt(document.getElementById('trainMin').value)||5,timerMax:parseInt(document.getElementById('trainMax').value)||20,useDecimal:document.getElementById('trainDecimal').checked}); 
         }
         
-        function endTraining() { trainingMode=false; cancelAnimationFrame(timerInterval); socket.emit('stopTrainingMode'); showScreen('menuScreen'); }
+        function stopTraining() {
+            if (!trainingMode || isCountingDown) return;
+            sndStop();
+            trainingMode = false;
+            isCountingDown = false;
+            cancelAnimationFrame(timerInterval);
+            
+            socket.emit('stopTraining', {
+                stopTime: Date.now(),
+                startTime: trainingStartTime,
+                targetTime: trainingTargetTime,
+                timerMin: parseInt(document.getElementById('trainMin').value) || 5,
+                timerMax: parseInt(document.getElementById('trainMax').value) || 20
+            });
+            
+            document.getElementById('trainStopBtn').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'block';
+        }
+        
+        function endTraining() {
+            trainingMode = false;
+            isCountingDown = false;
+            timerStarted = false;
+            myResult = false;
+            
+            cancelAnimationFrame(timerInterval);
+            timerInterval = null;
+            
+            if (audioCtx && audioCtx.state === 'running') {
+                audioCtx.suspend();
+            }
+            
+            socket.emit('stopTrainingMode');
+            
+            document.getElementById('trainStopBtn').style.display = 'none';
+            document.getElementById('trainCountdown').style.display = 'none';
+            document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'none';
+            document.getElementById('trainTimerDisplay').textContent = '0.00';
+            
+            showScreen('menuScreen');
+            
+            setTimeout(() => {
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }, 500);
+        }
 
         // ============ HANDLE MATCH ============
         function handleMatch(state) {
@@ -271,7 +320,6 @@
             else { cd.textContent=data.count; cd.style.color='#ff4444'; isCountingDown=true; timerStarted=false; sndTick(); }
         });
 
-        // PERFORMANCE.NOW() İLE MOBİL OPTİMİZE
         socket.on('timerStarted', (data) => {
             timerStartTime = performance.now();
             targetTime = data.targetTime;
@@ -310,9 +358,31 @@
         socket.on('waitingForOpponent', () => { document.getElementById('resultDisplay').style.display='block'; document.getElementById('resultDisplay').innerHTML='⏳ Rakip bekleniyor...'; });
         socket.on('error', (m) => { sndError(); alert(m); });
 
-        // ============ ANTRENMAN (PERFORMANCE NOW) ============
-        socket.on('trainingStarted', (data) => { trainingTargetTime=data.targetTime; showScreen('trainingScreen'); document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal); document.getElementById('trainTimerDisplay').textContent='0.00'; document.getElementById('trainResultDisplay').style.display='none'; document.getElementById('trainRatingDisplay').style.display='none'; document.getElementById('trainStopBtn').style.display='none'; document.getElementById('trainCountdown').style.display='none'; document.getElementById('trainNextInfo').style.display='none'; setTimeout(()=>socket.emit('startTrainingCountdown'),500); });
-        socket.on('trainingCountdown', (data) => { const cd=document.getElementById('trainCountdown'); cd.style.display='block'; if(data.count==='BAŞLA!'){ cd.textContent='BAŞLA!'; cd.style.color='#4ade80'; isCountingDown=false; sndGo(); setTimeout(()=>cd.style.display='none',200); } else { cd.textContent=data.count; cd.style.color='#ff4444'; isCountingDown=true; sndTick(); } });
+        // ============ ANTRENMAN OLAYLARI ============
+        socket.on('trainingStarted', (data) => { 
+            trainingTargetTime=data.targetTime; 
+            showScreen('trainingScreen'); 
+            document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal); 
+            document.getElementById('trainTimerDisplay').textContent='0.00'; 
+            document.getElementById('trainResultDisplay').style.display='none'; 
+            document.getElementById('trainRatingDisplay').style.display='none'; 
+            document.getElementById('trainStopBtn').style.display='none'; 
+            document.getElementById('trainCountdown').style.display='none'; 
+            document.getElementById('trainNextInfo').style.display='none'; 
+            setTimeout(()=>socket.emit('startTrainingCountdown'),500); 
+        });
+        socket.on('trainingCountdown', (data) => { 
+            const cd=document.getElementById('trainCountdown'); 
+            cd.style.display='block'; 
+            if(data.count==='BAŞLA!'){ 
+                cd.textContent='BAŞLA!'; cd.style.color='#4ade80'; 
+                isCountingDown=false; sndGo(); 
+                setTimeout(()=>cd.style.display='none',200); 
+            } else { 
+                cd.textContent=data.count; cd.style.color='#ff4444'; 
+                isCountingDown=true; sndTick(); 
+            } 
+        });
         
         socket.on('trainingTimerStarted', (data) => {
             trainingStartTime = performance.now();
@@ -333,8 +403,27 @@
             upd();
         });
         
-        socket.on('trainingResult', (data) => { cancelAnimationFrame(timerInterval); trainingMode=false; document.getElementById('trainResultDisplay').style.display='block'; document.getElementById('trainResultDisplay').innerHTML=`⏱️ Süren: <b>${fmtTimer(data.elapsed)}s</b><br>🎯 Hedef: ${fmtTimer(data.targetTime)}s<br>📊 Fark: ${fmtTimer(data.difference)}s (%${data.percentage})`; document.getElementById('trainRatingDisplay').style.display='block'; document.getElementById('trainRatingDisplay').innerHTML=`<div style="font-size:3rem">${data.emoji}</div><div style="color:${data.color};font-size:1.5rem">${data.rating}</div>`; sndWin(); document.getElementById('trainNextInfo').style.display='block'; });
-        socket.on('trainingNewRound', (data) => { trainingTargetTime=data.targetTime; document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal); document.getElementById('trainTimerDisplay').textContent='0.00'; document.getElementById('trainResultDisplay').style.display='none'; document.getElementById('trainRatingDisplay').style.display='none'; document.getElementById('trainStopBtn').style.display='none'; document.getElementById('trainCountdown').style.display='none'; document.getElementById('trainNextInfo').style.display='none'; setTimeout(()=>socket.emit('startTrainingCountdown'),800); });
+        socket.on('trainingResult', (data) => { 
+            cancelAnimationFrame(timerInterval); 
+            trainingMode=false; 
+            document.getElementById('trainResultDisplay').style.display='block'; 
+            document.getElementById('trainResultDisplay').innerHTML=`⏱️ Süren: <b>${fmtTimer(data.elapsed)}s</b><br>🎯 Hedef: ${fmtTimer(data.targetTime)}s<br>📊 Fark: ${fmtTimer(data.difference)}s (%${data.percentage})`; 
+            document.getElementById('trainRatingDisplay').style.display='block'; 
+            document.getElementById('trainRatingDisplay').innerHTML=`<div style="font-size:3rem">${data.emoji}</div><div style="color:${data.color};font-size:1.5rem">${data.rating}</div>`; 
+            sndWin(); 
+            document.getElementById('trainNextInfo').style.display='block'; 
+        });
+        socket.on('trainingNewRound', (data) => { 
+            trainingTargetTime=data.targetTime; 
+            document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal); 
+            document.getElementById('trainTimerDisplay').textContent='0.00'; 
+            document.getElementById('trainResultDisplay').style.display='none'; 
+            document.getElementById('trainRatingDisplay').style.display='none'; 
+            document.getElementById('trainStopBtn').style.display='none'; 
+            document.getElementById('trainCountdown').style.display='none'; 
+            document.getElementById('trainNextInfo').style.display='none'; 
+            setTimeout(()=>socket.emit('startTrainingCountdown'),800); 
+        });
 
         // ============ PING ============
         setInterval(()=>socket.emit('ping-check',{clientTime:Date.now()}),5000);
