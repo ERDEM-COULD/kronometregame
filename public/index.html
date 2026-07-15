@@ -225,44 +225,66 @@
         socket.on('roomClosed',(d)=>{alert(d.message);location.reload();});
         socket.on('tournamentStarted',(state)=>{handleMatch(state);if(isHost)setTimeout(()=>socket.emit('startCountdown'),500);});
 
-        socket.on('countdown',(data)=>{
-            const cd=document.getElementById('countdownDisplay');
-            cd.style.display='block';
-            if(data.count==='BAŞLA!'){
-                cd.textContent='BAŞLA!';cd.style.color='#4ade80';
-                isCountingDown=false;timerStarted=true;sndGo();
-                setTimeout(()=>cd.style.display='none',200);
-            }else{
-                cd.textContent=data.count;cd.style.color='#ff4444';
-                isCountingDown=true;timerStarted=false;sndTick();
-            }
-        });
+       socket.on('countdown', (data) => {
+    // Oynayan oyuncu kontrolü
+    const p = currentState?.currentPlayers || [];
+    const amIPlaying = (p[0] === playerName || p[1] === playerName);
+    
+    // SADECE oynayan oyunculara göster
+    if (!amIPlaying) return;
+    
+    const cd = document.getElementById('countdownDisplay');
+    cd.style.display = 'block';
+    
+    if (data.count === 'BAŞLA!') {
+        cd.textContent = 'BAŞLA!';
+        cd.style.color = '#4ade80';
+        isCountingDown = false;
+        timerStarted = true;
+        sndGo();
+        setTimeout(() => { cd.style.display = 'none'; }, 200);
+    } else {
+        cd.textContent = data.count;
+        cd.style.color = '#ff4444';
+        isCountingDown = true;
+        timerStarted = false;
+        sndTick();
+    }
+});
 
-        socket.on('timerStarted',(data)=>{
-            timerStartTime=performance.now();
-            targetTime=data.targetTime;
-            myResult=null;isCountingDown=false;timerStarted=true;
-            
-            const p=currentState?.currentPlayers||[];
-            const amIPlaying=(p[0]===playerName||p[1]===playerName);
-            
-            if(amIPlaying){
-                showScreen('matchScreen');
-                document.getElementById('targetTimeDisplay').textContent=fmtTarget(targetTime,currentState.useDecimal);
-                document.getElementById('timerDisplay').textContent='0.00';
-                document.getElementById('timerDisplay').classList.add('running');
-                document.getElementById('stopButton').style.display='block';
-                document.getElementById('stopButton').textContent='DURDUR!';
-                document.getElementById('resultDisplay').style.display='none';
-                document.getElementById('countdownDisplay').style.display='none';
-                document.getElementById('forceEndBtn').style.display=isHost?'block':'none';
-                
-                cancelAnimationFrame(timerInterval);
-                function upd(){if(!timerStarted)return;document.getElementById('timerDisplay').textContent=fmtTimer(Math.max(0,performance.now()-timerStartTime));timerInterval=requestAnimationFrame(upd);}
-                upd();
-            }
-        });
-
+        socket.on('timerStarted', (data) => {
+    timerStartTime = performance.now();
+    targetTime = data.targetTime;
+    myResult = null;
+    isCountingDown = false;
+    timerStarted = true;
+    
+    // Oynayan oyuncu kontrolü
+    const p = currentState?.currentPlayers || [];
+    const amIPlaying = (p[0] === playerName || p[1] === playerName);
+    
+    // SADECE oynayan oyunculara kronometre göster
+    if (!amIPlaying) return;
+    
+    showScreen('matchScreen');
+    document.getElementById('targetTimeDisplay').textContent = fmtTarget(targetTime, currentState.useDecimal);
+    document.getElementById('timerDisplay').textContent = '0.00';
+    document.getElementById('timerDisplay').classList.add('running');
+    document.getElementById('stopButton').style.display = 'block';
+    document.getElementById('stopButton').style.opacity = '1';
+    document.getElementById('stopButton').textContent = 'DURDUR!';
+    document.getElementById('resultDisplay').style.display = 'none';
+    document.getElementById('countdownDisplay').style.display = 'none';
+    document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
+    
+    cancelAnimationFrame(timerInterval);
+    function upd() {
+        if (!timerStarted) return;
+        document.getElementById('timerDisplay').textContent = fmtTimer(Math.max(0, performance.now() - timerStartTime));
+        if (timerStarted) timerInterval = requestAnimationFrame(upd);
+    }
+    upd();
+});
         socket.on('roundResult',(result)=>{
             cancelAnimationFrame(timerInterval);timerStarted=false;sndWin();
             document.getElementById('timerDisplay').classList.remove('running');
