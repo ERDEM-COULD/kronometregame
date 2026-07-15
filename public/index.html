@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🏆 Online Turnuva</title>
+    <style>
+        :root {
+            --bg: #0a0f1e;
+            --surface: rgba(20, 25, 40, 0.95);
+            --gold: #f9d423;
+            --red: #f83600;
+            --text: #e0e0e0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0f1e, #1a1f2e, #0d1117);
+            min-height: 100vh;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #f9d423, #f83600);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        input, button, select {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(15, 20, 30, 0.8);
+            color: white;
+            font-size: 1rem;
+        }
+
+        select { cursor: pointer; }
+
+        button {
+            background: linear-gradient(135deg, #f83600, #f9d423);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            margin: 8px 0;
+        }
+
+        button:active { transform: scale(0.95); }
+        button.secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        button.danger {
+            background: rgba(255, 50, 50, 0.3);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 50, 50, 0.3);
+        }
+
+        .code-display {
+            font-size: 2.5rem;
+            text-align: center;
+            font-weight: bold;
+            color: var(--gold);
+            letter-spacing: 5px;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+        }
+
+        .player-list, .champions-list {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            text-align: center;
+            font-weight: bold;
+            color: var(--gold);
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .countdown-display {
+            font-size: 6rem;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .target-display {
+            text-align: center;
+            color: #8892b0;
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .stop-btn {
+            background: #ff4444 !important;
+            color: white !important;
+            font-size: 1.5rem !important;
+            padding: 20px !important;
+            animation: pulse 1s infinite;
+        }
+
+        .chat-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 10px;
+            height: 120px;
+            overflow-y: auto;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .result-display {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: var(--gold);
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--gold);
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin: 3px;
+        }
+
+        .champion-item {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-group {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+
+        .settings-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .settings-group input[type="checkbox"] { width: auto; }
+        .settings-group input[type="number"] { width: 80px; text-align: center; }
+
+        .force-end-btn {
+            background: rgba(255, 50, 50, 0.5) !important;
+            color: white !important;
+            font-size: 0.8rem !important;
+            padding: 8px !important;
+            margin-top: 5px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Online Turnuva</h1>
+        
+        <!-- Ana Menü -->
+        <div id="menuScreen" class="screen active">
+            <input type="text" id="playerNameInput" placeholder="İsminizi girin" maxlength="20">
+            
+            <div class="settings-group" id="createSettings" style="display:none">
+                <h3 style="margin-bottom:8px">⚙️ Oda Ayarları</h3>
+                <label>Maksimum Oyuncu: <input type="number" id="maxPlayers" value="10" min="3" max="20"></label>
+                <label>Süre: <input type="number" id="timerMin" value="5" min="1" max="10" style="width:60px"> - <input type="number" id="timerMax" value="20" min="10" max="30" style="width:60px"> sn</label>
+                <label>Virgüllü Hedef Süre: <input type="checkbox" id="useDecimal" checked> <small style="color:#8892b0">(Kronometre her zaman virgüllü)</small></label>
+            </div>
+            
+            <button onclick="showCreateSettings()">🏠 Oda Oluştur</button>
+            <button onclick="createRoom()" id="createRoomBtn" style="display:none">✅ Odayı Oluştur</button>
+            
+            <div style="text-align:center; color:#8892b0; margin:10px">— veya —</div>
+            <input type="text" id="roomCodeInput" placeholder="Oda kodu" maxlength="6" style="text-transform:uppercase">
+            <button onclick="joinRoom()">🚪 Odaya Katıl</button>
+        </div>
+
+        <!-- Lobi -->
+        <div id="lobbyScreen" class="screen">
+            <div class="code-display" id="roomCodeDisplay"></div>
+            <div class="badge" id="hostBadge" style="display:none">👑 Oda Sahibi</div>
+            <div class="badge" id="settingsBadge" style="display:none"></div>
+            
+            <div class="player-list" id="lobbyPlayerList"></div>
+            
+            <button onclick="startTournament()" id="startTournamentBtn" style="display:none">🚀 Turnuvayı Başlat</button>
+            
+            <div id="championsSection" style="margin-top:10px">
+                <h4>🏆 Şampiyonlar</h4>
+                <div class="champions-list" id="championsList">
+                    <div style="color:#8892b0">Henüz şampiyon yok</div>
+                </div>
+            </div>
+            
+            <div class="chat-box" id="lobbyChat"></div>
+            <input type="text" id="chatInput" placeholder="Mesaj yaz..." maxlength="100">
+            <button onclick="sendMessage()" class="secondary">Gönder</button>
+            <button onclick="leaveRoom()" class="secondary">🚪 Odadan Ayrıl</button>
+        </div>
+
+        <!-- Yarışma -->
+        <div id="matchScreen" class="screen">
+            <div id="countdownDisplay" class="countdown-display" style="display:none"></div>
+            <div id="matchInfo" style="text-align:center; font-weight:bold; margin:10px; font-size:1.2rem"></div>
+            <div id="versusDisplay" style="text-align:center; font-size:1.5rem; margin:10px"></div>
+            <div class="target-display">🎯 Hedef: <span id="targetTimeDisplay"></span> saniye</div>
+            <div class="timer-display" id="timerDisplay">0.00</div>
+            <button class="stop-btn" id="stopButton" onclick="stopTimer()" style="display:none">DURDUR!</button>
+            <div id="resultDisplay" class="result-display"></div>
+            <button onclick="forceEndTournament()" class="force-end-btn" id="forceEndBtn" style="display:none">⛔ Oyunu Bitir (Lobiye Dön)</button>
+        </div>
+
+        <!-- Bekleme -->
+        <div id="waitingScreen" class="screen">
+            <div style="text-align:center; padding:40px">
+                <h2>⏳ Lütfen Bekleyin</h2>
+                <p id="waitingMessage" style="font-size:1.2rem; margin:20px 0"></p>
+                <p style="color:#8892b0">Şu an başka bir maç oynanıyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let playerName = '';
+        let roomCode = '';
+        let isHost = false;
+        let timerInterval = null;
+        let timerStartTime = 0;
+        let targetTime = 0;
+        let myResult = null;
+        let currentTournamentState = null;
+        let isCountingDown = false;
+        let timerStarted = false;
+
+        // ============ SES SİSTEMİ (YÜKSEK SES) ============
+        let audioCtx = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    console.log('✅ AudioContext oluşturuldu, durum:', audioCtx.state);
+                } catch(e) {
+                    console.error('❌ AudioContext hatası:', e);
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => {
+                    console.log('✅ AudioContext resume edildi');
+                }).catch(e => {
+                    console.error('❌ Resume hatası:', e);
+                });
+            }
+            return audioCtx;
+        }
+
+        function playBeep(frequency, duration, type = 'sine', volume = 0.8) {
+            try {
+                const ctx = initAudio();
+                if (!ctx) {
+                    console.warn('⚠️ AudioContext yok, ses çalınamıyor');
+                    return;
+                }
+                
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.type = type;
+                oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+                
+                gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + duration);
+                
+                console.log(`🔊 Ses çalındı: ${frequency}Hz, ${duration}s, vol:${volume}`);
+            } catch (e) {
+                console.error('❌ Ses çalma hatası:', e);
+            }
+        }
+
+        function playTickSound() {
+            playBeep(1000, 0.1, 'square', 0.7);
+        }
+
+        function playGoSound() {
+            playBeep(1500, 0.3, 'square', 0.9);
+            setTimeout(() => playBeep(2000, 0.2, 'square', 0.7), 150);
+        }
+
+        function playWinSound() {
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                setTimeout(() => playBeep(freq, 0.3, 'triangle', 0.7), i * 120);
+            });
+        }
+
+        function playChampionSound() {
+            const notes = [523, 659, 784, 1047, 784, 1047, 1319];
+            notes.forEach((freq, i) => {
+                setTimeout(() => playBeep(freq, 0.4, 'triangle', 0.8), i * 180);
+            });
+        }
+
+        function playClickSound() {
+            playBeep(800, 0.05, 'sine', 0.4);
+        }
+
+        function playErrorSound() {
+            playBeep(150, 0.3, 'sawtooth', 0.7);
+        }
+
+        function playStopSound() {
+            playBeep(1200, 0.1, 'square', 0.7);
+            setTimeout(() => playBeep(900, 0.1, 'square', 0.6), 80);
+        }
+
+        // ============ EKRAN FONKSİYONLARI ============
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showCreateSettings() {
+            playClickSound();
+            document.getElementById('createSettings').style.display = 'block';
+            document.getElementById('createRoomBtn').style.display = 'block';
+        }
+
+        function createRoom() {
+            playClickSound();
+            playerName = document.getElementById('playerNameInput').value.trim();
+            if (!playerName) {
+                playErrorSound();
+                return alert('İsim girin!');
+            }
+            
+            const settings = {
+                maxPlayers: parseInt(document.getElementById('maxPlayers').value) || 10,
+                useDecimal: document.getElementById('useDecimal').checked,
+                timerMin: parseInt(document.getElementById('timerMin').value) || 5,
+                timerMax: parseInt(document.getElementById('timerMax').value) || 20
+            };
+            
+            socket.emit('createRoom', { playerName, settings });
+        }
+
+        function joinRoom() {
+            playClickSound();
+            playerName = document.getElementById('playerNameInput').value.trim();
+            const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+            if (!playerName || !code) {
+                playErrorSound();
+                return alert('İsim ve oda kodu girin!');
+            }
+            socket.emit('joinRoom', { code, playerName });
+        }
+
+        function startTournament() {
+            playClickSound();
+            if (confirm('Turnuvayı başlatmak istediğinize emin misiniz?')) {
+                socket.emit('startTournament');
+            }
+        }
+
+        function stopTimer() {
+            if (myResult || isCountingDown || !timerStarted) return;
+            playStopSound();
+            const stopTime = Date.now();
+            myResult = true;
+            timerStarted = false;
+            socket.emit('stopTimer', { stopTime });
+            clearInterval(timerInterval);
+            document.getElementById('stopButton').style.opacity = '0.5';
+            document.getElementById('stopButton').textContent = 'BEKLENİYOR...';
+        }
+
+        function forceEndTournament() {
+            playClickSound();
+            if (confirm('Oyunu sonlandırıp lobiye dönmek istediğinize emin misiniz?')) {
+                socket.emit('forceEndTournament');
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message) {
+                socket.emit('sendMessage', { message });
+                input.value = '';
+                playClickSound();
+            }
+        }
+
+        function leaveRoom() {
+            playClickSound();
+            location.reload();
+        }
+
+        // Hedef süreyi formatla
+        function formatTargetTime(ms, useDecimal) {
+            if (useDecimal) {
+                return (ms / 1000).toFixed(2);
+            } else {
+                return Math.round(ms / 1000).toString();
+            }
+        }
+
+        // Kronometre her zaman 2 basamaklı (1.00 formatı)
+        function formatTimer(ms) {
+            return (ms / 1000).toFixed(2);
+        }
+
+        function handleTournamentState(state) {
+            currentTournamentState = state;
+            const useDecimal = state.useDecimal !== false;
+            const currentPlayers = state.currentPlayers;
+            
+            isCountingDown = false;
+            timerStarted = false;
+            document.getElementById('countdownDisplay').style.display = 'none';
+            document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
+            
+            if (currentPlayers.includes(playerName)) {
+                showScreen('matchScreen');
+                document.getElementById('matchInfo').textContent = state.currentMatch.type;
+                document.getElementById('versusDisplay').innerHTML = `
+                    <div style="font-size:1.2rem">${currentPlayers[0]}</div>
+                    <div style="color:#f83600; font-weight:bold">VS</div>
+                    <div style="font-size:1.2rem">${currentPlayers[1]}</div>
+                `;
+                document.getElementById('targetTimeDisplay').textContent = formatTargetTime(state.targetTime, useDecimal);
+                document.getElementById('timerDisplay').textContent = '0.00';
+                document.getElementById('stopButton').style.display = 'block';
+                document.getElementById('stopButton').style.opacity = '1';
+                document.getElementById('stopButton').textContent = 'DURDUR!';
+                document.getElementById('resultDisplay').textContent = '';
+            } else {
+                showScreen('waitingScreen');
+                document.getElementById('waitingMessage').innerHTML = `
+                    <div style="font-size:1.5rem; margin:20px 0">
+                        ${currentPlayers[0]} <span style="color:#f83600">VS</span> ${currentPlayers[1]}
+                    </div>
+                    <div>${state.currentMatch.type}</div>
+                `;
+            }
+        }
+
+        // ============ SOCKET EVENTS ============
+        socket.on('roomCreated', (data) => {
+            roomCode = data.code;
+            isHost = true;
+            document.getElementById('roomCodeDisplay').textContent = roomCode;
+            document.getElementById('hostBadge').style.display = 'inline-block';
+            document.getElementById('startTournamentBtn').style.display = 'block';
+            document.getElementById('settingsBadge').style.display = 'inline-block';
+            document.getElementById('settingsBadge').textContent = 
+                `⚙️ ${data.settings.maxPlayers} kişi | Hedef: ${data.settings.useDecimal ? 'Virgüllü' : 'Tam sayı'} | ${data.settings.timerMin}-${data.settings.timerMax}s`;
+            updateLobbyPlayers(data.players);
+            updateChampions(data.champions || []);
+            showScreen('lobbyScreen');
+            playClickSound();
+        });
+
+        socket.on('joinSuccess', (data) => {
+            roomCode = data.code;
+            document.getElementById('roomCodeDisplay').textContent = roomCode;
+            document.getElementById('settingsBadge').style.display = 'inline-block';
+            document.getElementById('settingsBadge').textContent = 
+                `⚙️ ${data.settings.maxPlayers} kişi | Hedef: ${data.settings.useDecimal ? 'Virgüllü' : 'Tam sayı'}`;
+            updateLobbyPlayers(data.players);
+            updateChampions(data.champions || []);
+            showScreen('lobbyScreen');
+            playClickSound();
+        });
+
+        socket.on('playerJoined', (players) => {
+            updateLobbyPlayers(players);
+            playClickSound();
+        });
+        
+        socket.on('playerLeft', (players) => {
+            updateLobbyPlayers(players);
+        });
+        
+        socket.on('playerKicked', (players) => updateLobbyPlayers(players));
+        
+        socket.on('kicked', () => {
+            playErrorSound();
+            alert('Odadan atıldınız!');
+            location.reload();
+        });
+
+        socket.on('roomClosed', (data) => {
+            playErrorSound();
+            alert(data.message);
+            location.reload();
+        });
+
+        socket.on('tournamentStarted', (state) => {
+            handleTournamentState(state);
+            if (isHost) {
+                setTimeout(() => socket.emit('startCountdown'), 500);
+            }
+        });
+
+        socket.on('countdown', (count) => {
+            const cd = document.getElementById('countdownDisplay');
+            cd.style.display = 'block';
+            
+            if (count === 'BAŞLA!') {
+                cd.textContent = 'BAŞLA!';
+                cd.style.color = '#4ade80';
+                isCountingDown = false;
+                timerStarted = true;
+                playGoSound();
+                setTimeout(() => { cd.style.display = 'none'; }, 200);
+            } else {
+                cd.textContent = count;
+                cd.style.color = '#ff4444';
+                isCountingDown = true;
+                timerStarted = false;
+                playTickSound();
+            }
+        });
+
+        socket.on('timerStarted', (data) => {
+            // Gecikmeyi önlemek için sunucudan gelen startTime'ı kullan
+            timerStartTime = data.startTime;
+            targetTime = data.targetTime;
+            myResult = null;
+            isCountingDown = false;
+            timerStarted = true;
+            
+            const currentPlayers = currentTournamentState?.currentPlayers;
+            if (currentPlayers && currentPlayers.includes(playerName)) {
+                showScreen('matchScreen');
+                document.getElementById('targetTimeDisplay').textContent = formatTargetTime(targetTime, currentTournamentState?.useDecimal);
+                document.getElementById('timerDisplay').textContent = '0.00';
+                document.getElementById('stopButton').style.display = 'block';
+                document.getElementById('stopButton').style.opacity = '1';
+                document.getElementById('stopButton').textContent = 'DURDUR!';
+                document.getElementById('resultDisplay').textContent = '';
+                document.getElementById('countdownDisplay').style.display = 'none';
+                document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
+                
+                clearInterval(timerInterval);
+                // Hemen başlat, gecikme yok
+                const updateTimer = () => {
+                    const elapsed = Date.now() - timerStartTime;
+                    document.getElementById('timerDisplay').textContent = formatTimer(Math.max(0, elapsed));
+                };
+                updateTimer(); // İlk değeri hemen göster
+                timerInterval = setInterval(updateTimer, 10);
+            }
+        });
+
+        socket.on('roundResult', (result) => {
+            clearInterval(timerInterval);
+            timerStarted = false;
+            
+            playWinSound();
+            
+            if (currentTournamentState?.currentPlayers.includes(playerName)) {
+                document.getElementById('stopButton').style.display = 'none';
+                let resultHTML = `🏆 <b>${result.winner}</b> kazandı!<br>`;
+                
+                if (result.tieBreak) {
+                    resultHTML += `<small style="color:#ff4444">⚠️ Süreler eşit! Salise farkıyla kazandı</small><br>`;
+                }
+                
+                resultHTML += `<small style="font-size:0.9rem">
+                    ${result.winner}: ${formatTimer(result.results[result.winner].elapsed)}s 
+                    (fark: ${formatTimer(result.results[result.winner].difference)}s)
+                </small>`;
+                
+                document.getElementById('resultDisplay').innerHTML = resultHTML;
+            }
+        });
+
+        socket.on('nextRound', (state) => {
+            handleTournamentState(state);
+            if (isHost) {
+                setTimeout(() => socket.emit('startCountdown'), 1000);
+            }
+        });
+
+        socket.on('tournamentEnd', (data) => {
+            clearInterval(timerInterval);
+            timerStarted = false;
+            
+            playChampionSound();
+            
+            showScreen('matchScreen');
+            document.getElementById('matchInfo').textContent = '🏆 ŞAMPİYON!';
+            document.getElementById('versusDisplay').innerHTML = '';
+            document.getElementById('stopButton').style.display = 'none';
+            document.getElementById('countdownDisplay').style.display = 'none';
+            document.getElementById('timerDisplay').textContent = '👑';
+            document.getElementById('resultDisplay').innerHTML = `
+                <div style="font-size:2rem">👑 <b>${data.champion}</b> 👑</div>
+                <div style="margin-top:10px">ŞAMPİYON!</div>
+            `;
+            
+            setTimeout(() => {
+                updateChampions(data.champions || []);
+                updateLobbyPlayers(data.players || []);
+                showScreen('lobbyScreen');
+                currentTournamentState = null;
+                document.getElementById('forceEndBtn').style.display = 'none';
+            }, 4000);
+        });
+
+        socket.on('tournamentForceEnd', (data) => {
+            clearInterval(timerInterval);
+            timerStarted = false;
+            
+            playErrorSound();
+            alert(data.message);
+            updateChampions(data.champions || []);
+            updateLobbyPlayers(data.players || []);
+            showScreen('lobbyScreen');
+            currentTournamentState = null;
+            document.getElementById('forceEndBtn').style.display = 'none';
+        });
+
+        socket.on('newMessage', (data) => {
+            const chatBox = document.getElementById('lobbyChat');
+            if (chatBox) {
+                chatBox.innerHTML += `<div><b>${data.player}:</b> ${data.message}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                playClickSound();
+            }
+        });
+
+        socket.on('waitingForOpponent', () => {
+            document.getElementById('resultDisplay').textContent = '⏳ Rakip bekleniyor...';
+        });
+
+        socket.on('error', (message) => {
+            playErrorSound();
+            alert(message);
+        });
+
+        // ============ YARDIMCI FONKSİYONLAR ============
+        function updateLobbyPlayers(players) {
+            const list = document.getElementById('lobbyPlayerList');
+            if (list && players) {
+                list.innerHTML = players.map(p => `
+                    <div class="player-item">
+                        <span>${p.name} ${p.isHost ? '👑' : ''}</span>
+                        ${isHost && !p.isHost ? `<button onclick="kickPlayer('${p.id}')" style="width:auto;padding:5px 10px;font-size:0.8rem">At</button>` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateChampions(champions) {
+            const list = document.getElementById('championsList');
+            if (list && champions) {
+                if (champions.length === 0) {
+                    list.innerHTML = '<div style="color:#8892b0">Henüz şampiyon yok</div>';
+                } else {
+                    list.innerHTML = champions.map((c, i) => `
+                        <div class="champion-item">
+                            <span>🏆</span>
+                            <span><b>${c.name}</b></span>
+                            <small style="color:#8892b0">${c.date}</small>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function kickPlayer(playerId) {
+            playClickSound();
+            if (confirm('Bu oyuncuyu atmak istediğinize emin misiniz?')) {
+                socket.emit('kickPlayer', { playerId });
+            }
+        }
+
+        // SES BAŞLATMA - Sayfa yüklenir yüklenmez dene
+        function forceInitAudio() {
+            console.log('🎵 Ses başlatılıyor...');
+            const ctx = initAudio();
+            if (ctx) {
+                // Kısa bir test sesi (duyulmayacak kadar kısa)
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.01, ctx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.001);
+                    console.log('✅ Test sesi başarılı');
+                } catch(e) {
+                    console.error('❌ Test sesi hatası:', e);
+                }
+            }
+        }
+
+        // Tüm etkileşimlerde ses başlatmayı dene
+        document.addEventListener('click', forceInitAudio, { once: false });
+        document.addEventListener('touchstart', forceInitAudio, { once: false });
+        document.addEventListener('keydown', forceInitAudio, { once: false });
+        
+        // Sayfa yüklendiğinde de dene
+        window.addEventListener('load', () => {
+            setTimeout(forceInitAudio, 500);
+        });
+    </script>
+</body>
+</html>
