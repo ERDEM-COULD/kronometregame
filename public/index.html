@@ -19,6 +19,7 @@
             min-height: 100vh; min-height: 100dvh; color: var(--text);
             display: flex; justify-content: center; align-items: flex-start; padding: 10px;
             -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+            touch-action: manipulation;
         }
         .container {
             max-width: 520px; width: 100%; background: var(--surface);
@@ -35,7 +36,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input, button { width: 100%; padding: 14px 16px; margin: 6px 0; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.15); background: rgba(15, 20, 35, 0.9); color: white; font-size: 1rem; transition: all 0.2s; outline: none; }
         input:focus { border-color: var(--gold); box-shadow: 0 0 20px rgba(249,212,35,0.15); }
-        button { background: linear-gradient(135deg, #f83600, #f9d423); color: #0a0f1e; font-weight: 700; cursor: pointer; border: none; letter-spacing: 0.5px; transition: all 0.3s; }
+        button { background: linear-gradient(135deg, #f83600, #f9d423); color: #0a0f1e; font-weight: 700; cursor: pointer; border: none; letter-spacing: 0.5px; transition: all 0.3s; touch-action: manipulation; }
         button:active { transform: scale(0.96); }
         button:disabled { opacity: 0.4; pointer-events: none; }
         button.secondary { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.2); }
@@ -48,13 +49,13 @@
         .player-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); border-radius: 10px; }
         .host-badge { background: var(--gold); color: #000; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
         .kick-btn { width: auto !important; padding: 6px 12px !important; font-size: 0.75rem !important; background: rgba(255,60,60,0.3) !important; color: #ff6b6b !important; border-radius: 8px !important; }
-        .timer-display { font-size: 5rem; font-weight: 900; color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 0 40px rgba(249,212,35,0.5); text-align: center; margin: 10px 0; }
+        .timer-display { font-size: 5rem; font-weight: 900; color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 0 40px rgba(249,212,35,0.5); text-align: center; margin: 10px 0; will-change: contents; }
         .timer-display.running { color: var(--green); text-shadow: 0 0 40px rgba(74,222,128,0.5); }
         .countdown-display { font-size: 7rem; font-weight: 900; text-align: center; animation: countPulse 0.4s infinite; text-shadow: 0 0 50px currentColor; }
         @keyframes countPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
         .target-display { text-align: center; color: var(--text2); margin: 8px 0; }
         .target-value { color: var(--gold); font-weight: 700; font-size: 1.3rem; }
-        .stop-btn { background: #ff4444 !important; color: white !important; font-size: 1.6rem !important; padding: 22px !important; animation: stopPulse 0.8s infinite; border-radius: 20px !important; }
+        .stop-btn { background: #ff4444 !important; color: white !important; font-size: 1.6rem !important; padding: 22px !important; animation: stopPulse 0.8s infinite; border-radius: 20px !important; touch-action: manipulation; }
         @keyframes stopPulse { 0%,100% { box-shadow: 0 0 20px rgba(255,68,68,0.5); } 50% { box-shadow: 0 0 50px rgba(255,68,68,0.9); } }
         .vs-display { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 1.3rem; font-weight: 700; padding: 15px; background: rgba(0,0,0,0.3); border-radius: var(--radius); margin: 10px 0; }
         .vs-text { color: var(--red); font-size: 1.8rem; font-weight: 900; }
@@ -86,7 +87,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header"><h1>🏆 Kronometre Turnuva</h1><div class="version">v4.0 • Hızlı & Kararlı</div><div class="ping-indicator" id="pingDisplay" style="display:none"><span class="ping-dot" id="pingDot"></span><span id="pingValue">--</span>ms</div></div>
+        <div class="header"><h1>🏆 Kronometre Turnuva</h1><div class="version">v5.0 • Mobil Optimize</div><div class="ping-indicator" id="pingDisplay" style="display:none"><span class="ping-dot" id="pingDot"></span><span id="pingValue">--</span>ms</div></div>
 
         <!-- MENÜ -->
         <div id="menuScreen" class="screen active">
@@ -198,26 +199,40 @@
         function leaveRoom() { sndClick(); location.reload(); }
         function forceEndTournament() { sndClick(); if(confirm('Oyunu bitir?')) socket.emit('forceEndTournament'); }
 
-        // ============ KRONOMETRE (ANINDA DURDURMA) ============
+        // ============ KRONOMETRE (ANINDA DUR - MOBİL OPTİMİZE) ============
         function stopTimer() {
             if (myResult || isCountingDown || !timerStarted) return;
-            const stopTime = Date.now();
-            myResult = true; timerStarted = false;
-            clearInterval(timerInterval);
+            
+            const stopTime = performance.now();
+            myResult = true;
+            timerStarted = false;
+            cancelAnimationFrame(timerInterval);
+            
             const elapsed = stopTime - timerStartTime;
             document.getElementById('timerDisplay').textContent = fmtTimer(Math.max(0, elapsed));
             document.getElementById('timerDisplay').classList.remove('running');
             document.getElementById('stopButton').style.display = 'none';
             document.getElementById('resultDisplay').style.display = 'block';
             document.getElementById('resultDisplay').innerHTML = '⏳ Sonuç bekleniyor...';
+            
             sndStop();
-            socket.emit('stopTimer', { stopTime });
+            socket.emit('stopTimer', { stopTime: Date.now() });
         }
 
         // ============ ANTRENMAN ============
         function startTraining() { sndClick(); socket.emit('startTraining',{timerMin:parseInt(document.getElementById('trainMin').value)||5,timerMax:parseInt(document.getElementById('trainMax').value)||20,useDecimal:document.getElementById('trainDecimal').checked}); }
-        function stopTraining() { if(!trainingMode||isCountingDown) return; sndStop(); trainingMode=false; clearInterval(timerInterval); socket.emit('stopTraining',{stopTime:Date.now(),startTime:trainingStartTime,targetTime:trainingTargetTime,timerMin:parseInt(document.getElementById('trainMin').value)||5,timerMax:parseInt(document.getElementById('trainMax').value)||20}); document.getElementById('trainStopBtn').style.display='none'; document.getElementById('trainNextInfo').style.display='block'; }
-        function endTraining() { trainingMode=false; clearInterval(timerInterval); socket.emit('stopTrainingMode'); showScreen('menuScreen'); }
+        
+        function stopTraining() {
+            if(!trainingMode||isCountingDown) return;
+            sndStop();
+            trainingMode=false;
+            cancelAnimationFrame(timerInterval);
+            socket.emit('stopTraining',{stopTime:Date.now(),startTime:trainingStartTime,targetTime:trainingTargetTime,timerMin:parseInt(document.getElementById('trainMin').value)||5,timerMax:parseInt(document.getElementById('trainMax').value)||20});
+            document.getElementById('trainStopBtn').style.display='none';
+            document.getElementById('trainNextInfo').style.display='block';
+        }
+        
+        function endTraining() { trainingMode=false; cancelAnimationFrame(timerInterval); socket.emit('stopTrainingMode'); showScreen('menuScreen'); }
 
         // ============ HANDLE MATCH ============
         function handleMatch(state) {
@@ -256,34 +271,69 @@
             else { cd.textContent=data.count; cd.style.color='#ff4444'; isCountingDown=true; timerStarted=false; sndTick(); }
         });
 
+        // PERFORMANCE.NOW() İLE MOBİL OPTİMİZE
         socket.on('timerStarted', (data) => {
-            timerStartTime=data.startTime; targetTime=data.targetTime; myResult=null; isCountingDown=false; timerStarted=true;
-            if(currentState&&currentState.currentPlayers.includes(playerName)){
+            timerStartTime = performance.now();
+            targetTime = data.targetTime;
+            myResult = null;
+            isCountingDown = false;
+            timerStarted = true;
+            
+            if (currentState && currentState.currentPlayers.includes(playerName)) {
                 showScreen('matchScreen');
-                document.getElementById('targetTimeDisplay').textContent=fmtTarget(targetTime,currentState.useDecimal);
-                document.getElementById('timerDisplay').textContent='0.00'; document.getElementById('timerDisplay').classList.add('running');
-                document.getElementById('stopButton').style.display='block'; document.getElementById('stopButton').style.opacity='1';
-                document.getElementById('stopButton').textContent='DURDUR!'; document.getElementById('resultDisplay').style.display='none';
-                document.getElementById('countdownDisplay').style.display='none'; document.getElementById('forceEndBtn').style.display=isHost?'block':'none';
-                clearInterval(timerInterval);
-                function upd() { if(!timerStarted) return; document.getElementById('timerDisplay').textContent=fmtTimer(Math.max(0,Date.now()-timerStartTime)); if(timerStarted) timerInterval=requestAnimationFrame(upd); }
+                document.getElementById('targetTimeDisplay').textContent = fmtTarget(targetTime, currentState.useDecimal);
+                document.getElementById('timerDisplay').textContent = '0.00';
+                document.getElementById('timerDisplay').classList.add('running');
+                document.getElementById('stopButton').style.display = 'block';
+                document.getElementById('stopButton').style.opacity = '1';
+                document.getElementById('stopButton').textContent = 'DURDUR!';
+                document.getElementById('resultDisplay').style.display = 'none';
+                document.getElementById('countdownDisplay').style.display = 'none';
+                document.getElementById('forceEndBtn').style.display = isHost ? 'block' : 'none';
+                
+                cancelAnimationFrame(timerInterval);
+                function upd() {
+                    if (!timerStarted) return;
+                    const elapsed = performance.now() - timerStartTime;
+                    document.getElementById('timerDisplay').textContent = fmtTimer(Math.max(0, elapsed));
+                    if (timerStarted) timerInterval = requestAnimationFrame(upd);
+                }
                 upd();
             }
         });
 
-        socket.on('roundResult', (result) => { clearInterval(timerInterval); timerStarted=false; sndWin(); document.getElementById('timerDisplay').classList.remove('running'); if(currentState?.currentPlayers.includes(playerName)){ document.getElementById('stopButton').style.display='none'; document.getElementById('resultDisplay').style.display='block'; let h=`🏆 <span class="winner-name">${result.winner}</span> kazandı!<br>`; if(result.tieBreak) h+=`<small style="color:#ff4444">⚠️ Salise farkıyla!</small><br>`; h+=`<small>${fmtTimer(result.results[result.winner].elapsed)}s (fark: ${fmtTimer(result.results[result.winner].difference)}s)</small>`; document.getElementById('resultDisplay').innerHTML=h; } });
+        socket.on('roundResult', (result) => { cancelAnimationFrame(timerInterval); timerStarted=false; sndWin(); document.getElementById('timerDisplay').classList.remove('running'); if(currentState?.currentPlayers.includes(playerName)){ document.getElementById('stopButton').style.display='none'; document.getElementById('resultDisplay').style.display='block'; let h=`🏆 <span class="winner-name">${result.winner}</span> kazandı!<br>`; if(result.tieBreak) h+=`<small style="color:#ff4444">⚠️ Salise farkıyla!</small><br>`; h+=`<small>${fmtTimer(result.results[result.winner].elapsed)}s (fark: ${fmtTimer(result.results[result.winner].difference)}s)</small>`; document.getElementById('resultDisplay').innerHTML=h; } });
         socket.on('nextRound', (state) => { currentState=state; handleMatch(state); if(isHost) setTimeout(()=>socket.emit('startCountdown'),1000); });
-        socket.on('tournamentEnd', (data) => { clearInterval(timerInterval); timerStarted=false; sndChamp(); document.getElementById('timerDisplay').classList.remove('running'); showScreen('matchScreen'); document.getElementById('matchInfo').textContent='👑 ŞAMPİYON!'; document.getElementById('player1Name').textContent=data.champion; document.getElementById('player2Name').textContent='🏆'; document.getElementById('stopButton').style.display='none'; document.getElementById('timerDisplay').textContent='👑'; document.getElementById('resultDisplay').style.display='block'; document.getElementById('resultDisplay').innerHTML=`<div class="winner-name">${data.champion}</div><div>ŞAMPİYON!</div>`; setTimeout(()=>{updateChampions(data.champions);updateHistory(data.gameHistory);updatePlayers(data.players);showScreen('lobbyScreen');currentState=null;},4000); });
-        socket.on('tournamentForceEnd', (data) => { clearInterval(timerInterval); sndError(); alert(data.message); updateChampions(data.champions); updateHistory(data.gameHistory); updatePlayers(data.players); showScreen('lobbyScreen'); currentState=null; });
+        socket.on('tournamentEnd', (data) => { cancelAnimationFrame(timerInterval); timerStarted=false; sndChamp(); document.getElementById('timerDisplay').classList.remove('running'); showScreen('matchScreen'); document.getElementById('matchInfo').textContent='👑 ŞAMPİYON!'; document.getElementById('player1Name').textContent=data.champion; document.getElementById('player2Name').textContent='🏆'; document.getElementById('stopButton').style.display='none'; document.getElementById('timerDisplay').textContent='👑'; document.getElementById('resultDisplay').style.display='block'; document.getElementById('resultDisplay').innerHTML=`<div class="winner-name">${data.champion}</div><div>ŞAMPİYON!</div>`; setTimeout(()=>{updateChampions(data.champions);updateHistory(data.gameHistory);updatePlayers(data.players);showScreen('lobbyScreen');currentState=null;},4000); });
+        socket.on('tournamentForceEnd', (data) => { cancelAnimationFrame(timerInterval); sndError(); alert(data.message); updateChampions(data.champions); updateHistory(data.gameHistory); updatePlayers(data.players); showScreen('lobbyScreen'); currentState=null; });
         socket.on('newMessage', (data) => { const b=document.getElementById('lobbyChat'); if(b){ const o=data.player===playerName; b.innerHTML+=`<div class="chat-msg${o?' own':''}"><span class="sender">${data.player}</span> ${data.message}</div>`; b.scrollTop=b.scrollHeight; if(!o) sndClick(); } });
         socket.on('waitingForOpponent', () => { document.getElementById('resultDisplay').style.display='block'; document.getElementById('resultDisplay').innerHTML='⏳ Rakip bekleniyor...'; });
         socket.on('error', (m) => { sndError(); alert(m); });
 
-        // ============ ANTRENMAN OLAYLARI ============
+        // ============ ANTRENMAN (PERFORMANCE NOW) ============
         socket.on('trainingStarted', (data) => { trainingTargetTime=data.targetTime; showScreen('trainingScreen'); document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal); document.getElementById('trainTimerDisplay').textContent='0.00'; document.getElementById('trainResultDisplay').style.display='none'; document.getElementById('trainRatingDisplay').style.display='none'; document.getElementById('trainStopBtn').style.display='none'; document.getElementById('trainCountdown').style.display='none'; document.getElementById('trainNextInfo').style.display='none'; setTimeout(()=>socket.emit('startTrainingCountdown'),500); });
         socket.on('trainingCountdown', (data) => { const cd=document.getElementById('trainCountdown'); cd.style.display='block'; if(data.count==='BAŞLA!'){ cd.textContent='BAŞLA!'; cd.style.color='#4ade80'; isCountingDown=false; sndGo(); setTimeout(()=>cd.style.display='none',200); } else { cd.textContent=data.count; cd.style.color='#ff4444'; isCountingDown=true; sndTick(); } });
-        socket.on('trainingTimerStarted', (data) => { trainingStartTime=data.startTime; trainingMode=true; isCountingDown=false; document.getElementById('trainStopBtn').style.display='block'; document.getElementById('trainCountdown').style.display='none'; document.getElementById('trainResultDisplay').style.display='none'; document.getElementById('trainRatingDisplay').style.display='none'; document.getElementById('trainNextInfo').style.display='none'; clearInterval(timerInterval); function upd(){ document.getElementById('trainTimerDisplay').textContent=fmtTimer(Math.max(0,Date.now()-trainingStartTime)); if(trainingMode) timerInterval=requestAnimationFrame(upd); } upd(); });
-        socket.on('trainingResult', (data) => { clearInterval(timerInterval); trainingMode=false; document.getElementById('trainResultDisplay').style.display='block'; document.getElementById('trainResultDisplay').innerHTML=`⏱️ Süren: <b>${fmtTimer(data.elapsed)}s</b><br>🎯 Hedef: ${fmtTimer(data.targetTime)}s<br>📊 Fark: ${fmtTimer(data.difference)}s (%${data.percentage})`; document.getElementById('trainRatingDisplay').style.display='block'; document.getElementById('trainRatingDisplay').innerHTML=`<div style="font-size:3rem">${data.emoji}</div><div style="color:${data.color};font-size:1.5rem">${data.rating}</div>`; sndWin(); document.getElementById('trainNextInfo').style.display='block'; });
+        
+        socket.on('trainingTimerStarted', (data) => {
+            trainingStartTime = performance.now();
+            trainingMode = true;
+            isCountingDown = false;
+            document.getElementById('trainStopBtn').style.display = 'block';
+            document.getElementById('trainCountdown').style.display = 'none';
+            document.getElementById('trainResultDisplay').style.display = 'none';
+            document.getElementById('trainRatingDisplay').style.display = 'none';
+            document.getElementById('trainNextInfo').style.display = 'none';
+            
+            cancelAnimationFrame(timerInterval);
+            function upd() {
+                const elapsed = performance.now() - trainingStartTime;
+                document.getElementById('trainTimerDisplay').textContent = fmtTimer(Math.max(0, elapsed));
+                if (trainingMode) timerInterval = requestAnimationFrame(upd);
+            }
+            upd();
+        });
+        
+        socket.on('trainingResult', (data) => { cancelAnimationFrame(timerInterval); trainingMode=false; document.getElementById('trainResultDisplay').style.display='block'; document.getElementById('trainResultDisplay').innerHTML=`⏱️ Süren: <b>${fmtTimer(data.elapsed)}s</b><br>🎯 Hedef: ${fmtTimer(data.targetTime)}s<br>📊 Fark: ${fmtTimer(data.difference)}s (%${data.percentage})`; document.getElementById('trainRatingDisplay').style.display='block'; document.getElementById('trainRatingDisplay').innerHTML=`<div style="font-size:3rem">${data.emoji}</div><div style="color:${data.color};font-size:1.5rem">${data.rating}</div>`; sndWin(); document.getElementById('trainNextInfo').style.display='block'; });
         socket.on('trainingNewRound', (data) => { trainingTargetTime=data.targetTime; document.getElementById('trainTargetDisplay').textContent=fmtTarget(data.targetTime,data.useDecimal); document.getElementById('trainTimerDisplay').textContent='0.00'; document.getElementById('trainResultDisplay').style.display='none'; document.getElementById('trainRatingDisplay').style.display='none'; document.getElementById('trainStopBtn').style.display='none'; document.getElementById('trainCountdown').style.display='none'; document.getElementById('trainNextInfo').style.display='none'; setTimeout(()=>socket.emit('startTrainingCountdown'),800); });
 
         // ============ PING ============
