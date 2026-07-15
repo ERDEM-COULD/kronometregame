@@ -203,9 +203,7 @@ class Tournament {
     return this.getState();
   }
 
-  getState() {
-    return { step: this.step, playerCount: this.playerCount, currentMatch: this.currentMatch, waitingPlayer: this.waitingPlayer, currentPlayers: this.currentPlayers, targetTime: this.targetTime, timerStarted: this.timerStarted, match1: this.match1, match2: this.match2, match3: this.match3, match4: this.match4, champion: this.champion, allPlayers: this.allPlayers, useDecimal: this.useDecimal, roundName: this.roundName };
-  }
+  getState() { return { step: this.step, playerCount: this.playerCount, currentMatch: this.currentMatch, waitingPlayer: this.waitingPlayer, currentPlayers: this.currentPlayers, targetTime: this.targetTime, timerStarted: this.timerStarted, match1: this.match1, match2: this.match2, match3: this.match3, match4: this.match4, champion: this.champion, allPlayers: this.allPlayers, useDecimal: this.useDecimal, roundName: this.roundName }; }
 }
 
 io.on('connection', (socket) => {
@@ -220,7 +218,6 @@ io.on('connection', (socket) => {
     rooms.set(code, room); roomCodes.set(code, code);
     socket.join(code); currentRoom = code; playerName = name;
     socket.emit('roomCreated', { code, players: getPlayers(room), settings: room.settings, champions: room.champions, gameHistory: room.gameHistory });
-    console.log(`✅ Oda: ${code} - ${name}`);
   });
 
   socket.on('joinRoom', (data) => {
@@ -233,7 +230,6 @@ io.on('connection', (socket) => {
     socket.join(code); currentRoom = code; playerName = name;
     io.to(code).emit('playerJoined', getPlayers(room));
     socket.emit('joinSuccess', { code, players: getPlayers(room), settings: room.settings, champions: room.champions, gameHistory: room.gameHistory });
-    console.log(`👤 ${name} katıldı: ${code}`);
   });
 
   socket.on('kickPlayer', (data) => {
@@ -251,7 +247,6 @@ io.on('connection', (socket) => {
     room.tournament = new Tournament(arr, room.settings);
     const state = room.tournament.start();
     io.to(currentRoom).emit('tournamentStarted', state);
-    console.log(`🏆 Turnuva: ${currentRoom} (${arr.length} kişi)`);
   });
 
   socket.on('startCountdown', () => {
@@ -304,11 +299,7 @@ io.on('connection', (socket) => {
   socket.on('startTrainingCountdown', () => {
     if (!trainingMode) return;
     let count = 3; socket.emit('trainingCountdown', { count });
-    const ci = setInterval(() => {
-      count--;
-      if (count > 0) socket.emit('trainingCountdown', { count });
-      else { clearInterval(ci); socket.emit('trainingCountdown', { count: 'BAŞLA!' }); socket.emit('trainingTimerStarted', { startTime: Date.now() }); }
-    }, 1000);
+    const ci = setInterval(() => { count--; if (count > 0) socket.emit('trainingCountdown', { count }); else { clearInterval(ci); socket.emit('trainingCountdown', { count: 'BAŞLA!' }); socket.emit('trainingTimerStarted', { startTime: Date.now() }); } }, 1000);
   });
 
   socket.on('stopTraining', (data) => {
@@ -352,4 +343,4 @@ io.on('connection', (socket) => {
 function getPlayers(room) { return Array.from(room.players.values()); }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => console.log(`🏆 Turnuva v4.0 - Port: ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`🏆 Turnuva v7.0 - Port: ${PORT}`));
